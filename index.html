@@ -1,0 +1,2264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1B2A4A">
+<meta name="description" content="PitchCraft Interactive - Tu pitch perfecto en 3 minutos, visualizado">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PitchCraft">
+<title>PitchCraft Interactive - Tu Pitch Perfecto en 3 Minutos</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+.ic{width:1em;height:1em;display:inline-block;vertical-align:-0.125em;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+:root{--primary:#E8621A;--primary-dark:#c24f12;--secondary:#f0a830;--accent:#4FB286;--danger:#d6453f;--dark:#1B2A4A;--darker:#13203b;--card-bg:#21314f;--card-bg-hover:#2b3e60;--text:#F5F0E8;--text-muted:#9aa6bd;--border:#33425f;--gradient-start:#E8621A;--gradient-end:#f0a830;--hook-color:#d6453f;--interest-color:#f0a830;--desire-color:#E8621A;--action-color:#4FB286;--close-color:#4a8fb0;--shadow-tint:rgba(11,18,35,0.55);--z-base:1;--z-nav:100;--z-toast:300;--z-overlay:500}
+::selection{background:rgba(232,98,26,0.3);color:var(--text)}
+html{scroll-behavior:smooth}
+*:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:4px}
+.btn-primary-custom:active,.btn-outline-custom:active,.audience-btn:active,.practice-btn:active,.install-pwa-btn:active,.nav-link-custom:active,.craft-card:active{transform:scale(0.97);transition-duration:.08s}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--darker);color:var(--text);min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+h1,h2,h3,h4,h5{font-family:'Syne',sans-serif;letter-spacing:-0.02em;text-wrap:balance}p{text-wrap:pretty}
+#particleCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.app-container{position:relative;z-index:1;min-height:100dvh}
+.app-container::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 50% at 75% 0%,rgba(232,98,26,0.10),transparent 70%),radial-gradient(50% 45% at 10% 100%,rgba(79,143,176,0.10),transparent 70%)}
+.navbar-custom{background:rgba(15,23,42,0.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0.75rem 0}
+.navbar-brand{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--text)!important;display:flex;align-items:center;gap:0.75rem;text-decoration:none}
+.navbar-brand .logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:white}
+.nav-link-custom{color:var(--text-muted)!important;font-weight:500;font-size:0.9rem;padding:0.5rem 1rem!important;border-radius:8px;transition:all 0.3s ease;cursor:pointer;display:flex;align-items:center;gap:0.5rem}
+.nav-link-custom:hover,.nav-link-custom.active{color:var(--text)!important;background:rgba(232,98,26,0.15)}
+.nav-link-custom.active{color:var(--primary)!important}
+.hero-section{padding:4rem 0 3rem;text-align:center;position:relative}
+.hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(232,98,26,0.15);border:1px solid rgba(232,98,26,0.3);color:var(--primary);padding:0.5rem 1.25rem;border-radius:50px;font-size:0.85rem;font-weight:600;margin-bottom:1.5rem}
+.hero-title{font-size:clamp(2.5rem,5vw,4.5rem);font-weight:800;line-height:1.1;margin-bottom:1rem;background:linear-gradient(135deg,#fff 0%,#f0a830 55%,#E8621A 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+/* ===== MECHATRONIC LAYER ===== */
+.mecha-grid{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.4;background-image:linear-gradient(rgba(232,98,26,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(232,98,26,.05) 1px,transparent 1px);background-size:42px 42px;mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 30%,transparent 75%)}
+.hud-corner::before,.hud-corner::after{content:"";position:absolute;width:14px;height:14px;border:2px solid var(--primary);opacity:.7}
+.hud-corner::before{top:-1px;left:-1px;border-right:none;border-bottom:none}
+.hud-corner::after{bottom:-1px;right:-1px;border-left:none;border-top:none}
+.section-card{position:relative}
+.section-card.hud-corner::before,.section-card.hud-corner::after{width:12px;height:12px}
+/* robot */
+.robot-stage{display:flex;justify-content:center;margin:1.5rem auto 0;max-width:240px;filter:drop-shadow(0 12px 30px rgba(11,18,35,.6))}
+.robot-svg{width:100%;height:auto}
+.robot-svg .bob{animation:robotBob 3.5s ease-in-out infinite;transform-origin:center}
+@keyframes robotBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.robot-svg .eye{animation:robotEye 4s ease-in-out infinite}
+@keyframes robotEye{0%,90%,100%{opacity:1}94%{opacity:.15}}
+.robot-svg .scan{animation:robotScan 2.6s linear infinite}
+@keyframes robotScan{0%{transform:translateY(0);opacity:0}10%{opacity:.9}90%{opacity:.9}100%{transform:translateY(34px);opacity:0}}
+.robot-svg .antenna-pulse{animation:antPulse 1.6s ease-in-out infinite}
+@keyframes antPulse{0%,100%{r:3;opacity:1}50%{r:5;opacity:.5}}
+.robot-svg .ring{transform-origin:center;animation:ringSpin 8s linear infinite}
+@keyframes ringSpin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.robot-svg *{animation:none!important}}
+.hero-subtitle{font-size:1.15rem;color:var(--text-muted);max-width:600px;margin:0 auto 2rem;line-height:1.7}
+.hero-cta{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn-primary-custom{background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));border:none;color:white;padding:0.875rem 2rem;border-radius:12px;font-weight:600;font-size:1rem;transition:all 0.3s ease;box-shadow:0 4px 20px rgba(232,98,26,0.4);display:inline-flex;align-items:center;gap:0.5rem}
+.btn-primary-custom:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(232,98,26,0.5);color:white}
+.btn-outline-custom{background:transparent;border:2px solid var(--border);color:var(--text);padding:0.875rem 2rem;border-radius:12px;font-weight:600;font-size:1rem;transition:all 0.3s ease;display:inline-flex;align-items:center;gap:0.5rem}
+.btn-outline-custom:hover{border-color:var(--primary);color:var(--primary);background:rgba(232,98,26,0.1)}
+.timer-display{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:1.5rem;text-align:center;margin:2rem auto;max-width:500px}
+.timer-circle{width:180px;height:180px;margin:0 auto 1rem;position:relative}
+.timer-circle svg{transform:rotate(-90deg)}
+.timer-circle-bg{fill:none;stroke:var(--border);stroke-width:8}
+.timer-circle-progress{fill:none;stroke:url(#timerGradient);stroke-width:8;stroke-linecap:round;stroke-dasharray:502;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear}
+.timer-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2.5rem;font-weight:800;font-family:'DM Mono',monospace;color:var(--text)}
+.timer-label{font-size:0.85rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:2px}
+.timer-phases{display:flex;justify-content:center;gap:0.5rem;margin-top:1rem;flex-wrap:wrap}
+.phase-badge{padding:0.35rem 0.75rem;border-radius:20px;font-size:0.75rem;font-weight:600;opacity:0.5;transition:all 0.3s ease}
+.phase-badge.active{opacity:1;transform:scale(1.1);box-shadow:0 0 15px currentColor}
+.phase-hook{background:rgba(239,68,68,0.2);color:var(--hook-color);border:1px solid var(--hook-color)}
+.phase-interest{background:rgba(245,158,11,0.2);color:var(--interest-color);border:1px solid var(--interest-color)}
+.phase-desire{background:rgba(232,98,26,0.2);color:var(--desire-color);border:1px solid var(--desire-color)}
+.phase-action{background:rgba(16,185,129,0.2);color:var(--action-color);border:1px solid var(--action-color)}
+.phase-close{background:rgba(6,182,212,0.2);color:var(--close-color);border:1px solid var(--close-color)}
+.craft-card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:1.5rem;transition:all 0.3s ease;height:100%}
+.craft-card:hover{border-color:var(--primary);transform:translateY(-4px);box-shadow:0 10px 40px rgba(232,98,26,0.15)}
+.craft-card-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1rem}
+.craft-card h4{font-size:1.1rem;font-weight:700;margin-bottom:0.5rem;color:var(--text)}
+.craft-card p{font-size:0.9rem;color:var(--text-muted);margin-bottom:0;line-height:1.6}
+.section-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:2rem;margin-bottom:1.5rem;transition:all 0.3s ease}
+.section-card:hover{border-color:rgba(232,98,26,0.5)}
+.section-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.section-number{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:white;flex-shrink:0}
+.section-title{font-size:1.25rem;font-weight:700;margin:0}
+.form-label-custom{color:var(--text-muted);font-size:0.85rem;font-weight:500;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:1px;display:block}
+.form-control-custom{background:var(--darker);border:1px solid var(--border);border-radius:12px;color:var(--text);padding:0.875rem 1rem;font-size:0.95rem;transition:all 0.3s ease;width:100%}
+.form-control-custom:focus{background:var(--darker);border-color:var(--primary);color:var(--text);box-shadow:0 0 0 4px rgba(232,98,26,0.15);outline:none}
+.form-control-custom::placeholder{color:#475569}
+textarea.form-control-custom{min-height:100px;resize:vertical}
+select.form-control-custom{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem}
+.audience-selector{display:flex;gap:0.75rem;flex-wrap:wrap}
+.audience-btn{flex:1;min-width:120px;padding:1rem;border:2px solid var(--border);border-radius:14px;background:var(--darker);color:var(--text-muted);text-align:center;cursor:pointer;transition:all 0.3s ease;display:flex;flex-direction:column;align-items:center;gap:0.5rem}
+.audience-btn i{font-size:1.5rem}
+.audience-btn span{font-size:0.85rem;font-weight:600}
+.audience-btn:hover{border-color:var(--primary);color:var(--text)}
+.audience-btn.selected{border-color:var(--primary);background:rgba(232,98,26,0.15);color:var(--primary)}
+.progress-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:1.5rem 0}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gradient-start),var(--gradient-end));border-radius:3px;transition:width 0.5s ease}
+.radar-container{display:flex;justify-content:center;align-items:center;padding:1rem}
+.preview-stage{background:var(--darker);border:1px solid var(--border);border-radius:20px;padding:2rem;min-height:400px;position:relative;overflow:hidden}
+.viz-shader{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:.55;pointer-events:none}
+.preview-stage .preview-slide{position:relative;z-index:1}
+.preview-stage::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 70% 60% at 50% 50%,transparent 40%,var(--darker) 92%)}
+.preview-slide{display:none;animation:fadeIn 0.5s ease}
+.preview-slide.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.preview-slide h3{font-size:1.75rem;margin-bottom:1rem;color:var(--primary)}
+.preview-slide p{font-size:1.1rem;line-height:1.8;color:var(--text-muted)}
+.preview-nav{display:flex;justify-content:space-between;align-items:center;margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border)}
+.practice-mode{background:var(--card-bg);border-radius:20px;padding:2rem;text-align:center}
+.practice-timer{font-size:4rem;font-weight:800;font-family:'DM Mono',monospace;color:var(--primary);margin:1rem 0}
+.practice-controls{display:flex;gap:1rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap}
+.practice-btn{width:60px;height:60px;border-radius:50%;border:2px solid var(--border);background:var(--darker);color:var(--text);display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;transition:all 0.3s ease}
+.practice-btn:hover{border-color:var(--primary);color:var(--primary);transform:scale(1.1)}
+.practice-btn.active{background:var(--primary);border-color:var(--primary);color:white;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,98,26,0.4)}50%{box-shadow:0 0 0 15px rgba(232,98,26,0)}}
+.metric-card{background:var(--darker);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center}
+.metric-value{font-size:1.75rem;font-weight:800;color:var(--primary)}
+.metric-label{font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px}
+.footer-custom{background:var(--darker);border-top:1px solid var(--border);padding:2.5rem 0;text-align:center;color:var(--text-muted);font-size:0.85rem}
+.gooey-wrap{position:relative;height:64px;margin-bottom:1.5rem}
+.gooey-text{display:flex;align-items:center;justify-content:center;height:100%}
+.gooey-text span{position:absolute;font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(1.6rem,5vw,2.6rem);color:var(--primary);user-select:none;white-space:nowrap}
+.footer-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;max-width:760px;margin:0 auto}
+@media(max-width:640px){.footer-stats{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:1rem .75rem;transition:border-color .2s,transform .2s}
+.stat-card:hover{border-color:var(--primary);transform:translateY(-3px)}
+.stat-num{font-family:'DM Mono',monospace;font-size:1.7rem;font-weight:500;color:var(--text);line-height:1;font-variant-numeric:tabular-nums}
+.stat-den{font-size:.9rem;color:var(--text-muted)}
+.stat-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-top:.4rem}
+.sparkline{width:100%;height:24px;margin-top:.5rem;display:block}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.float-animation{animation:float 3s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(232,98,26,0.3)}50%{box-shadow:0 0 40px rgba(232,98,26,0.5)}}
+.glow-animation{animation:glow 2s ease-in-out infinite}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:var(--darker)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--primary)}
+@media(max-width:768px){.hero-title{font-size:2rem}.timer-circle{width:140px;height:140px}.timer-text{font-size:2rem}.practice-timer{font-size:2.5rem}.section-card{padding:1.25rem}.audience-btn{min-width:100px;padding:0.75rem}.navbar-brand span{font-size:1.2rem}}
+.toast-container{position:fixed;bottom:2rem;right:2rem;z-index:9999}
+.toast-custom{background:var(--card-bg);border:1px solid var(--primary);border-radius:12px;color:var(--text);padding:1rem 1.5rem;box-shadow:0 10px 40px rgba(0,0,0,0.4);animation:slideIn 0.3s ease;margin-bottom:0.5rem}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.phase-timeline{display:flex;align-items:center;gap:0;margin:2rem 0;padding:0 1rem}
+.phase-node{flex:1;text-align:center;position:relative}
+.phase-node-dot{width:16px;height:16px;border-radius:50%;background:var(--border);margin:0 auto 0.5rem;transition:all 0.3s ease;position:relative;z-index:2}
+.phase-node-dot.active{background:var(--primary);box-shadow:0 0 15px var(--primary);transform:scale(1.3)}
+.phase-node-dot.completed{background:var(--accent)}
+.phase-node-label{font-size:0.75rem;color:var(--text-muted);font-weight:600}
+.phase-node-time{font-size:0.65rem;color:#475569}
+.phase-connector{flex:1;height:2px;background:var(--border);position:relative;top:-18px;z-index:1}
+.phase-connector.completed{background:linear-gradient(90deg,var(--accent),var(--primary))}
+.share-url{background:var(--darker);border:1px solid var(--border);border-radius:12px;padding:1rem;display:flex;align-items:center;gap:1rem;font-family:monospace;font-size:0.85rem;color:var(--text-muted);word-break:break-all}
+.share-url button{flex-shrink:0}
+.install-pwa-btn{position:fixed;bottom:2rem;left:2rem;z-index:1000;background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));border:none;color:white;padding:0.75rem 1.5rem;border-radius:50px;font-weight:600;font-size:0.9rem;box-shadow:0 4px 20px rgba(232,98,26,0.4);cursor:pointer;transition:all 0.3s ease;display:none}
+.install-pwa-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(232,98,26,0.5)}
+.install-pwa-btn.show{display:block;animation:slideIn 0.3s ease}
+.offline-badge{position:fixed;top:80px;right:1rem;z-index:1000;background:var(--danger);color:white;padding:0.5rem 1rem;border-radius:50px;font-size:0.8rem;font-weight:600;display:none;animation:slideIn 0.3s ease}
+.offline-badge.show{display:block}
+.audio-visualizer{display:flex;align-items:flex-end;justify-content:center;gap:3px;height:60px;margin:1rem 0}
+.audio-bar{width:4px;background:linear-gradient(to top,var(--primary),var(--gradient-end));border-radius:2px;transition:height 0.1s ease}
+.heatmap-container{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;max-width:300px;margin:1rem auto}
+.heatmap-cell{aspect-ratio:1;border-radius:4px;background:var(--border);transition:all 0.3s ease}
+.heatmap-cell.hot{background:var(--danger)}.heatmap-cell.warm{background:var(--secondary)}.heatmap-cell.cool{background:var(--primary)}.heatmap-cell.cold{background:var(--accent)}
+.presentation-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--darker);z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem}
+.prompt-modal-overlay{position:fixed;inset:0;background:rgba(11,18,35,0.78);backdrop-filter:blur(6px);z-index:9999;display:none;align-items:flex-start;justify-content:center;padding:5vh 1rem;overflow-y:auto}
+.prompt-modal-overlay.active{display:flex}
+.prompt-modal{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:2rem;max-width:680px;width:100%;box-shadow:0 24px 80px var(--shadow-tint)}
+.btn-close-modal{background:transparent;border:1px solid var(--border);color:var(--text-muted);width:36px;height:36px;border-radius:10px;cursor:pointer;transition:all .15s}
+.btn-close-modal:hover{border-color:var(--primary);color:var(--primary)}
+.presentation-overlay.active{display:flex}
+.presentation-overlay .preview-slide{display:none;text-align:center;max-width:900px}
+.presentation-overlay .preview-slide.active{display:block}
+.presentation-overlay h3{font-size:3rem!important;margin-bottom:2rem!important}
+.presentation-overlay p{font-size:1.5rem!important;line-height:1.8!important}
+.presentation-controls{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;gap:1rem;z-index:9999}
+/* ===== TEXT REVEAL (presenter titles) ===== */
+.reveal-char{display:inline-block;opacity:0;transform:translateY(0.5em);animation:revealChar .5s cubic-bezier(0.16,1,0.3,1) forwards}
+@keyframes revealChar{to{opacity:1;transform:translateY(0)}}
+.presentation-overlay h3{overflow:hidden}
+/* ===== RADAR STATS ===== */
+.radar-stats{display:flex;flex-wrap:wrap;gap:2rem;align-items:center;justify-content:center;padding:1rem 0}
+.radar-ring{position:relative;width:200px;height:200px;flex:none}
+.radar-ring .ringc{position:absolute;inset:0;margin:auto;border-radius:50%;border:1px solid rgba(232,98,26,.18)}
+.radar-ring .sweep{position:absolute;top:50%;right:50%;width:100px;height:2px;transform-origin:right center;background:linear-gradient(to left,transparent,var(--primary));animation:radarSweep 4s linear infinite}
+@keyframes radarSweep{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.radar-ring .blip{position:absolute;width:8px;height:8px;border-radius:50%;background:var(--secondary);box-shadow:0 0 10px var(--secondary);transform:translate(-50%,-50%)}
+.radar-ring .center-val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'DM Mono',monospace}
+.radar-ring .center-val b{font-size:1.6rem;color:var(--text)}
+.radar-ring .center-val small{font-size:.6rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em}
+.phase-bars{flex:1;min-width:220px;max-width:320px}
+.phase-bar{margin-bottom:.7rem}
+.phase-bar .pb-label{display:flex;justify-content:space-between;font-size:.75rem;color:var(--text-muted);margin-bottom:.25rem}
+.phase-bar .pb-track{height:8px;background:var(--darker);border-radius:6px;overflow:hidden}
+.phase-bar .pb-fill{height:100%;width:0;border-radius:6px;transition:width 1s cubic-bezier(0.16,1,0.3,1)}
+@media(prefers-reduced-motion:reduce){.radar-ring .sweep,.reveal-char{animation:none}.reveal-char{opacity:1;transform:none}}
+/* ===== SLIDE 0: CINEMATIC GLOW ===== */
+.presentation-overlay .pres-glow .pres-text{background:linear-gradient(180deg,var(--text) 0%,rgba(245,240,232,0.4) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 20px rgba(232,98,26,0.25));display:inline-block}
+.presentation-overlay .pres-glow .pres-text .char{display:inline-block;opacity:0;transform:scale(0.8) translateY(20px);animation:glowCharIn .6s cubic-bezier(0.16,1,0.3,1) forwards}
+@keyframes glowCharIn{to{opacity:1;transform:scale(1) translateY(0)}}
+/* ===== SLIDE 1: TEXT ROLL ===== */
+.presentation-overlay .pres-roll{overflow:hidden;display:inline-block}
+.presentation-overlay .pres-roll .pres-text{position:relative;display:inline-block}
+.presentation-overlay .pres-roll .roll-layer{display:inline-block;white-space:nowrap}
+.presentation-overlay .pres-roll .roll-top .char{display:inline-block;transform:translateY(0);animation:rollUp .5s cubic-bezier(0.16,1,0.3,1) forwards}
+.presentation-overlay .pres-roll .roll-bot{position:absolute;top:0;left:0}
+.presentation-overlay .pres-roll .roll-bot .char{display:inline-block;transform:translateY(100%);animation:rollIn .5s cubic-bezier(0.16,1,0.3,1) forwards}
+@keyframes rollUp{to{transform:translateY(-100%)}}
+@keyframes rollIn{to{transform:translateY(0)}}
+/* ===== SLIDE 2: SHUTTER SLICES ===== */
+.presentation-overlay .pres-shutter{position:relative;display:inline-block}
+.presentation-overlay .pres-shutter .slice{position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden}
+.presentation-overlay .pres-shutter .slice span{display:inline-block}
+.presentation-overlay .pres-shutter .slice-top{clip-path:polygon(0 0,100% 0,100% 35%,0 35%)}
+.presentation-overlay .pres-shutter .slice-mid{clip-path:polygon(0 35%,100% 35%,100% 65%,0 65%)}
+.presentation-overlay .pres-shutter .slice-bot{clip-path:polygon(0 65%,100% 65%,100% 100%,0 100%)}
+.presentation-overlay .pres-shutter .slice-top .char{animation:sliceX1 .7s ease-in-out forwards;opacity:0}
+.presentation-overlay .pres-shutter .slice-mid .char{animation:sliceX2 .7s ease-in-out forwards;opacity:0}
+.presentation-overlay .pres-shutter .slice-bot .char{animation:sliceX3 .7s ease-in-out forwards;opacity:0}
+@keyframes sliceX1{from{transform:translateX(-100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes sliceX2{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes sliceX3{from{transform:translateX(-100%);opacity:0}to{transform:translateX(0);opacity:1}}
+/* ===== SLIDE 3: MAGNETIC REVEAL ===== */
+.presentation-overlay .pres-magnetic{position:relative;display:inline-block;letter-spacing:0.05em;font-weight:800}
+.presentation-overlay .pres-magnetic .mag-circle{position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:var(--primary);transform:translate(-50%,-50%);overflow:hidden;display:flex;align-items:center;justify-content:center;pointer-events:none;transition:width .5s cubic-bezier(0.33,1,0.68,1),height .5s cubic-bezier(0.33,1,0.68,1)}
+.presentation-overlay .pres-magnetic .mag-circle .mag-inner{display:inline-block;white-space:nowrap;color:var(--darker)}
+.presentation-overlay .pres-magnetic.mag-active .mag-circle{width:180px;height:180px}
+/* ===== SLIDE 4: TECH TERMINAL ===== */
+.presentation-overlay .pres-tech{font-family:'DM Mono',monospace;letter-spacing:0.1em;text-transform:uppercase;position:relative;display:inline-block}
+.presentation-overlay .pres-tech::before,.presentation-overlay .pres-tech::after{content:"";position:absolute;width:12px;height:12px;border:2px solid var(--primary);opacity:0.7}
+.presentation-overlay .pres-tech::before{top:-8px;left:-8px;border-right:none;border-bottom:none}
+.presentation-overlay .pres-tech::after{bottom:-8px;right:-8px;border-left:none;border-top:none}
+.presentation-overlay .pres-tech .cursor{display:inline-block;width:3px;height:1em;background:var(--primary);margin-left:2px;vertical-align:text-bottom;animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+/* ===== SLIDE 5: GLASS REFRACTION ===== */
+.presentation-overlay .pres-glass{position:relative;display:inline-block}
+.presentation-overlay .pres-glass .word{display:inline-block;margin-right:.25em;opacity:0;transform:translateY(80px);background:linear-gradient(135deg,#0367FE 0%,#3b82f6 50%,#60a5fa 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 20px rgba(3,103,254,0.5));animation:glassWordIn .8s cubic-bezier(0.16,1,0.3,1) forwards}
+@keyframes glassWordIn{to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.presentation-overlay .pres-glow .char,.presentation-overlay .pres-roll .char,.presentation-overlay .pres-shutter .char,.presentation-overlay .pres-glass .word{animation:none;opacity:1;transform:none}}
+.presenter-notes{position:fixed;bottom:5rem;left:2rem;max-width:300px;background:rgba(30,41,59,0.9);border:1px solid var(--border);border-radius:12px;padding:1rem;font-size:0.85rem;color:var(--text-muted);display:none}
+.presenter-notes.show{display:block}
+.comparison-matrix{width:100%;border-collapse:collapse;margin-top:1rem}
+.comparison-matrix th,.comparison-matrix td{padding:0.75rem;text-align:center;border:1px solid var(--border)}
+.comparison-matrix th{background:var(--darker);color:var(--text-muted);font-size:0.8rem;text-transform:uppercase}
+.comparison-matrix td{color:var(--text);font-size:0.9rem}
+.comparison-matrix .highlight{background:rgba(232,98,26,0.2);color:var(--primary);font-weight:700}
+.custom-tabs{display:flex;gap:0.5rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem}
+.custom-tab{padding:0.5rem 1rem;border-radius:8px;background:transparent;border:none;color:var(--text-muted);font-size:0.9rem;font-weight:500;cursor:pointer;transition:all 0.3s ease}
+.custom-tab:hover{color:var(--text);background:rgba(232,98,26,0.1)}
+.custom-tab.active{color:var(--primary);background:rgba(232,98,26,0.15)}
+.tab-content{display:none}.tab-content.active{display:block;animation:fadeIn 0.3s ease}
+.saved-pitch-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:0.75rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all 0.3s ease}
+.saved-pitch-card:hover{border-color:var(--primary);transform:translateX(4px)}
+.saved-pitch-info h5{font-size:1rem;margin:0;color:var(--text)}
+.saved-pitch-info p{font-size:0.8rem;color:var(--text-muted);margin:0}
+.saved-pitch-actions{display:flex;gap:0.5rem}
+.saved-pitch-actions button{background:none;border:none;color:var(--text-muted);font-size:1.1rem;cursor:pointer;padding:0.25rem;transition:color 0.3s ease}
+.saved-pitch-actions button:hover{color:var(--primary)}
+.spinner-custom{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.recording-indicator{display:inline-flex;align-items:center;gap:0.5rem;color:var(--danger);font-size:0.85rem;font-weight:600}
+.recording-dot{width:10px;height:10px;background:var(--danger);border-radius:50%;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.section-content{animation:fadeIn 0.4s ease}
+@media(max-width:991px){.navbar-collapse{background:var(--dark);border-radius:12px;margin-top:0.5rem;padding:1rem;border:1px solid var(--border)}}
+.audience-btn,.practice-btn,.btn-primary-custom,.btn-outline-custom{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+*:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="i-arrow-counterclockwise" viewBox="0 0 24 24"><path d="M4 6v4h4"/><path d="M4.5 10a8 8 0 1 1-.5 4"/></symbol><symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M20 12H5M11 6 5 12l6 6"/></symbol><symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol><symbol id="i-bar-chart" viewBox="0 0 24 24"><path d="M4 20V4"/><path d="M4 20h16"/><rect x="7" y="12" width="3" height="5"/><rect x="12" y="8" width="3" height="9"/><rect x="17" y="5" width="3" height="12"/></symbol><symbol id="i-bar-chart-line-fill" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><rect x="7" y="11" width="3" height="6" fill="currentColor" stroke="none"/><rect x="12" y="7" width="3" height="10" fill="currentColor" stroke="none"/><rect x="17" y="13" width="3" height="4" fill="currentColor" stroke="none"/></symbol><symbol id="i-bullseye" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></symbol><symbol id="i-cash-coin" viewBox="0 0 24 24"><circle cx="9" cy="12" r="6"/><path d="M9 9v6M7.5 10.5h2.2a1.3 1.3 0 0 1 0 2.6H8"/><path d="M15 7a6 6 0 0 1 0 10"/></symbol><symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.5 11 15l4.5-5.5"/></symbol><symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="6" y="5" width="12" height="16" rx="2"/><rect x="9" y="3" width="6" height="4" rx="1"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></symbol><symbol id="i-clock-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4.5V9H8"/><path d="M12 8v4l3 2"/></symbol><symbol id="i-code" viewBox="0 0 24 24"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4"/></symbol><symbol id="i-cpu-fill" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2"/><rect x="10" y="10" width="4" height="4" fill="currentColor" stroke="none"/><path d="M9 4v3M12 4v3M15 4v3M9 17v3M12 17v3M15 17v3M4 9h3M4 12h3M4 15h3M17 9h3M17 12h3M17 15h3"/></symbol><symbol id="i-display" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M9 20h6M12 16v4"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v10M8 11l4 4 4-4"/><path d="M5 19h14"/></symbol><symbol id="i-eraser" viewBox="0 0 24 24"><path d="M8 19 4 15a2 2 0 0 1 0-3l7-7 6 6-7 7H8Z"/><path d="M8 19h11"/></symbol><symbol id="i-exclamation-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v6"/><circle cx="12" cy="16.5" r="1" fill="currentColor" stroke="none"/></symbol><symbol id="i-exclamation-triangle" viewBox="0 0 24 24"><path d="M12 4 21 19H3Z"/><path d="M12 10v4"/><circle cx="12" cy="16.8" r="1" fill="currentColor" stroke="none"/></symbol><symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12C6 6.5 9 5 12 5s6 1.5 9.5 7c-3.5 5.5-6.5 7-9.5 7s-6-1.5-9.5-7Z"/><circle cx="12" cy="12" r="3"/></symbol><symbol id="i-folder" viewBox="0 0 24 24"><path d="M4 7h5l2 2h9v10H4Z"/></symbol><symbol id="i-fullscreen" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol><symbol id="i-fullscreen-exit" viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></symbol><symbol id="i-git" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.2"/><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="9" r="2.2"/><path d="M6 8v8M6 12h8a4 4 0 0 0 4-3"/></symbol><symbol id="i-graph-up" viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="M7 15l3-3 3 2 5-6"/></symbol><symbol id="i-graph-up-arrow" viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="M7 15l3-3 3 2 4-5"/><path d="M15 7h4v4"/></symbol><symbol id="i-handshake" viewBox="0 0 24 24"><path d="M3 9l4-2 5 2 5-2 4 2v6l-4 2-3-2"/><path d="M12 9l-3 3 2 2 2-2"/></symbol><symbol id="i-house" viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5"/><path d="M6 10.5V19h12v-8.5"/><path d="M10 19v-4h4v4"/></symbol><symbol id="i-inbox" viewBox="0 0 24 24"><path d="M4 13 6 5h12l2 8v6H4Z"/><path d="M4 13h5l1.5 2h3L15 13h5"/></symbol><symbol id="i-info-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5"/><circle cx="12" cy="8" r="1" fill="currentColor" stroke="none"/></symbol><symbol id="i-journal-bookmark-fill" viewBox="0 0 24 24"><rect x="6" y="4" width="13" height="16" rx="2"/><path d="M6 8H4M6 12H4M6 16H4"/><path d="M11 4v6l2-1.5L15 10V4Z" fill="currentColor" stroke="none"/></symbol><symbol id="i-journal-text" viewBox="0 0 24 24"><rect x="6" y="4" width="13" height="16" rx="2"/><path d="M6 8H4M6 12H4M6 16H4M10 9h6M10 13h6"/></symbol><symbol id="i-laptop" viewBox="0 0 24 24"><rect x="5" y="6" width="14" height="9" rx="1.5"/><path d="M3 19h18l-1-3H4Z"/></symbol><symbol id="i-lightbulb" viewBox="0 0 24 24"><path d="M8 14a5 5 0 1 1 8 0c-1 1.2-1.5 2-1.5 3h-5c0-1-.5-1.8-1.5-3Z"/><path d="M9.5 20h5M10 22h4"/></symbol><symbol id="i-lightning-charge" viewBox="0 0 24 24"><path d="M13 3 5 13h5l-1 8 8-10h-5l1-8Z"/></symbol><symbol id="i-lightning-charge-fill" viewBox="0 0 24 24"><path d="M13 3 5 13h5l-1 8 8-10h-5l1-8Z" fill="currentColor" stroke="none"/></symbol><symbol id="i-link-45deg" viewBox="0 0 24 24"><path d="M9 15l6-6"/><path d="M10 7l2-2a3.5 3.5 0 0 1 5 5l-2 2"/><path d="M14 17l-2 2a3.5 3.5 0 0 1-5-5l2-2"/></symbol><symbol id="i-magic" viewBox="0 0 24 24"><path d="M5 19 14 10"/><path d="M16 5l.6 1.6L18 7.2l-1.4.6L16 9l-.6-1.6L14 6.8l1.4-.6Z" fill="currentColor" stroke="none"/><path d="M19 11l.4 1L20.5 12.5l-1.1.4L19 14l-.4-1.1L17.5 12.5l1.1-.4Z" fill="currentColor" stroke="none"/></symbol><symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0"/><path d="M12 17v4M9 21h6"/></symbol><symbol id="i-mortarboard-fill" viewBox="0 0 24 24"><path d="M12 5 3 9l9 4 9-4Z" fill="currentColor" stroke="none"/><path d="M7 11.5V15c0 1.5 2.5 2.5 5 2.5s5-1 5-2.5v-3.5"/><path d="M21 9v5"/></symbol><symbol id="i-pause-fill" viewBox="0 0 24 24"><rect x="7" y="5" width="3.5" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="13.5" y="5" width="3.5" height="14" rx="1" fill="currentColor" stroke="none"/></symbol><symbol id="i-pencil" viewBox="0 0 24 24"><path d="M5 19l1-4L16 5l3 3L9 18Z"/><path d="M14 7l3 3"/></symbol><symbol id="i-pencil-square" viewBox="0 0 24 24"><path d="M5 5h9v3"/><path d="M5 5v14h14v-9"/><path d="M12 14l2-1 6-6-2-2-6 6Z"/></symbol><symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 6a3 3 0 0 1 0 6M16.5 14.5a5.5 5.5 0 0 1 4 4.5"/></symbol><symbol id="i-person-check" viewBox="0 0 24 24"><circle cx="10" cy="8" r="3.2"/><path d="M4 19a6 6 0 0 1 12 0"/><path d="M16 13l2 2 3.5-3.5"/></symbol><symbol id="i-phone" viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="18" rx="2"/><path d="M11 18h2"/></symbol><symbol id="i-play" viewBox="0 0 24 24"><path d="M7 5 18 12 7 19Z"/></symbol><symbol id="i-play-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M10 8.5 16 12l-6 3.5Z" fill="currentColor" stroke="none"/></symbol><symbol id="i-play-fill" viewBox="0 0 24 24"><path d="M7 5 18 12 7 19Z" fill="currentColor" stroke="none"/></symbol><symbol id="i-plus-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 8.5v7M8.5 12h7"/></symbol><symbol id="i-qr-code" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><path d="M14 14h3v3M20 14v6h-6"/></symbol><symbol id="i-radar" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 18.5 7"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/></symbol><symbol id="i-rocket" viewBox="0 0 24 24"><path d="M12 3c3 1.5 4.5 5 4.5 8L12 15l-4.5-4c0-3 1.5-6.5 4.5-8Z"/><circle cx="12" cy="9" r="1.6"/><path d="M7.5 15 5 18m11.5-3L19 18M9.5 16.5 8 21l4-2 4 2-1.5-4.5"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M5 5h11l3 3v11H5Z"/><path d="M8 5v5h7V5M8 19v-5h8v5"/></symbol><symbol id="i-share" viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="18" cy="18" r="2.4"/><path d="M8 11 16 7M8 13l8 4"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 8h10M18 8h2M4 16h2M10 16h10"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/></symbol><symbol id="i-speedometer2" viewBox="0 0 24 24"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-4"/><circle cx="12" cy="16" r="1.4" fill="currentColor" stroke="none"/></symbol><symbol id="i-stars" viewBox="0 0 24 24"><path d="M12 4l1.6 4.4L18 10l-4.4 1.6L12 16l-1.6-4.4L6 10l4.4-1.6Z" fill="currentColor" stroke="none"/><path d="M18 15l.7 1.8L20.5 17.5l-1.8.7L18 20l-.7-1.8L15.5 17.5l1.8-.7Z" fill="currentColor" stroke="none"/></symbol><symbol id="i-stop-fill" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none"/></symbol><symbol id="i-stopwatch" viewBox="0 0 24 24"><circle cx="12" cy="13" r="7.5"/><path d="M12 13V9M9.5 2.5h5M19 6l1.5-1.5"/></symbol><symbol id="i-tablet" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/></symbol><symbol id="i-tools" viewBox="0 0 24 24"><path d="M14 7a3.5 3.5 0 0 0-4.7 4.2L4 16.5 7.5 20l5.3-5.3A3.5 3.5 0 0 0 17 10l-2 2-2-2 2-2Z"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></symbol><symbol id="i-wifi-off" viewBox="0 0 24 24"><path d="M3 8a16 16 0 0 1 8-3M21 8a16 16 0 0 0-5-2.6"/><path d="M7 12a10 10 0 0 1 3-1.8M17 12a10 10 0 0 0-2-1.3"/><path d="M10 15.5a4 4 0 0 1 4 0"/><circle cx="12" cy="19" r="1" fill="currentColor" stroke="none"/><path d="M3 3l18 18"/></symbol><symbol id="i-x-lg" viewBox="0 0 24 24"><path d="M5 5 19 19M19 5 5 19"/></symbol></svg>
+<canvas id="particleCanvas"></canvas>
+<div class="offline-badge" id="offlineBadge"><svg class="ic" aria-hidden="true"><use href="#i-wifi-off"></use></svg> Modo Offline</div>
+<button class="install-pwa-btn" id="installPwaBtn" onclick="installPWA()"><svg class="ic" aria-hidden="true"><use href="#i-download"></use></svg> Instalar App</button>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="presentation-overlay" id="presentationOverlay">
+<div class="preview-slide active" id="pres-slide-0">
+<div style="text-align:center">
+<div style="width:120px;height:120px;background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));border-radius:30px;display:flex;align-items:center;justify-content:center;margin:0 auto 2rem;font-size:4rem;color:white"><svg class="ic" aria-hidden="true"><use href="#i-bullseye"></use></svg></div>
+<h3 id="presTitle" class="pres-slide-0" style="font-size:3.5rem!important"><span class="pres-text" data-text="PitchCraft Interactive">PitchCraft Interactive</span></h3>
+<p id="presTagline" style="font-size:1.5rem!important;color:var(--primary)">Tu pitch perfecto en 3 minutos, visualizado</p>
+</div>
+</div>
+<div class="preview-slide" id="pres-slide-1">
+<h3 class="pres-slide-1"><svg class="ic" style="color:var(--hook-color)" aria-hidden="true"><use href="#i-exclamation-triangle"></use></svg> <span class="pres-text" data-text="El Problema">El Problema</span></h3>
+<p id="presProblem">Los emprendedores digitales no tienen una herramienta estructurada para condensar su valor en un formato de 3 minutos.</p>
+</div>
+<div class="preview-slide" id="pres-slide-2">
+<h3 class="pres-slide-2"><svg class="ic" style="color:var(--interest-color)" aria-hidden="true"><use href="#i-lightbulb"></use></svg> <span class="pres-text" data-text="La Solucion">La Solucion</span></h3>
+<p id="presSolution">PitchCraft es un motor de optimizacion narrativa que guia al usuario a traves de 7 puntos estructurales.</p>
+</div>
+<div class="preview-slide" id="pres-slide-3">
+<h3 class="pres-slide-3"><svg class="ic" style="color:var(--desire-color)" aria-hidden="true"><use href="#i-graph-up"></use></svg> <span class="pres-text" data-text="Propuesta de Valor">Propuesta de Valor</span></h3>
+<p id="presValue">Transforma el pitch de un acto de persuasion intuitiva en un proceso de diseno deliberado, medible y replicable.</p>
+</div>
+<div class="preview-slide" id="pres-slide-4">
+<h3 class="pres-slide-4"><svg class="ic" style="color:var(--action-color)" aria-hidden="true"><use href="#i-rocket"></use></svg> <span class="pres-text" data-text="Llamado a la Accion">Llamado a la Accion</span></h3>
+<p id="presAction">Prueba PitchCraft hoy mismo. Crea tu primer pitch en menos de 10 minutos.</p>
+</div>
+<div class="preview-slide" id="pres-slide-5">
+<h3 class="pres-slide-5"><svg class="ic" style="color:var(--close-color)" aria-hidden="true"><use href="#i-check-circle"></use></svg> <span class="pres-text" data-text="Cierre">Cierre</span></h3>
+<p id="presClose">PitchCraft no produce un documento estatico. Genera una experiencia web viva.</p>
+</div>
+<div class="presenter-notes" id="presenterNotes"><strong>Notas del presentador:</strong><br><span id="presenterNoteText">Manten contacto visual. Sonrie. Este es tu momento de hook.</span></div>
+<div class="presentation-controls">
+<button class="btn btn-outline-custom" onclick="prevPresSlide()"><svg class="ic" aria-hidden="true"><use href="#i-arrow-left"></use></svg></button>
+<span style="color:var(--text-muted)"><span id="presSlideCurrent">1</span> / <span id="presSlideTotal">6</span></span>
+<button class="btn btn-outline-custom" onclick="nextPresSlide()"><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"></use></svg></button>
+<button class="btn btn-primary-custom" onclick="exitPresentationMode()"><svg class="ic" aria-hidden="true"><use href="#i-fullscreen-exit"></use></svg> Salir</button>
+</div>
+</div>
+
+<div class="app-container">
+<div class="mecha-grid"></div>
+<nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+<div class="container">
+<a class="navbar-brand" href="#" onclick="showSection('home')"><div class="logo-icon"><svg class="ic" aria-hidden="true"><use href="#i-bullseye"></use></svg></div><span>PitchCraft</span></a>
+<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Toggle navigation"><span class="navbar-toggler-icon" style="filter:invert(1)"></span></button>
+<div class="collapse navbar-collapse" id="navbarNav">
+<ul class="navbar-nav ms-auto">
+<li class="nav-item"><a class="nav-link-custom active" onclick="showSection('home')" id="nav-home"><svg class="ic" aria-hidden="true"><use href="#i-house"></use></svg> Inicio</a></li>
+<li class="nav-item"><a class="nav-link-custom" onclick="showSection('build')" id="nav-build"><svg class="ic" aria-hidden="true"><use href="#i-tools"></use></svg> Construir</a></li>
+<li class="nav-item"><a class="nav-link-custom" onclick="showSection('visualize')" id="nav-visualize"><svg class="ic" aria-hidden="true"><use href="#i-eye"></use></svg> Visualizar</a></li>
+<li class="nav-item"><a class="nav-link-custom" onclick="showSection('practice')" id="nav-practice"><svg class="ic" aria-hidden="true"><use href="#i-mic"></use></svg> Practicar</a></li>
+<li class="nav-item"><a class="nav-link-custom" onclick="showSection('share')" id="nav-share"><svg class="ic" aria-hidden="true"><use href="#i-share"></use></svg> Compartir</a></li>
+</ul>
+</div>
+</div>
+</nav>
+
+<main style="padding-top:80px">
+<section id="section-home" class="section-content">
+<div class="hero-section">
+<div class="container">
+<div class="hero-badge float-animation"><svg class="ic" aria-hidden="true"><use href="#i-cpu-fill"></use></svg>Motor de Optimización Narrativa</div>
+
+<div class="robot-stage">
+<svg class="robot-svg" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Robot mecatrónico">
+<defs>
+<linearGradient id="rbBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b3e60"/><stop offset="1" stop-color="#1B2A4A"/></linearGradient>
+<linearGradient id="rbAccent" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0a830"/><stop offset="1" stop-color="#E8621A"/></linearGradient>
+<radialGradient id="rbEye" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#fff"/><stop offset="0.5" stop-color="#f0a830"/><stop offset="1" stop-color="#E8621A"/></radialGradient>
+<clipPath id="visorClip"><rect x="62" y="78" width="76" height="34" rx="12"/></clipPath>
+</defs>
+<!-- orbital ring -->
+<ellipse class="ring" cx="100" cy="150" rx="78" ry="22" fill="none" stroke="rgba(232,98,26,0.35)" stroke-width="1.5" stroke-dasharray="4 8"/>
+<g class="bob">
+<!-- antenna -->
+<line x1="100" y1="36" x2="100" y2="54" stroke="#33425f" stroke-width="3" stroke-linecap="round"/>
+<circle class="antenna-pulse" cx="100" cy="32" r="3" fill="url(#rbAccent)"/>
+<!-- head -->
+<rect x="56" y="54" width="88" height="68" rx="20" fill="url(#rbBody)" stroke="#33425f" stroke-width="2"/>
+<!-- visor -->
+<rect x="62" y="78" width="76" height="34" rx="12" fill="#0d1626" stroke="#33425f" stroke-width="1.5"/>
+<g clip-path="url(#visorClip)">
+<circle class="eye" cx="84" cy="95" r="7" fill="url(#rbEye)"/>
+<circle class="eye" cx="116" cy="95" r="7" fill="url(#rbEye)"/>
+<rect class="scan" x="62" y="78" width="76" height="3" fill="rgba(240,168,48,0.8)"/>
+</g>
+<!-- side bolts -->
+<circle cx="56" cy="88" r="4" fill="#33425f"/><circle cx="144" cy="88" r="4" fill="#33425f"/>
+<!-- neck -->
+<rect x="90" y="120" width="20" height="10" fill="#33425f"/>
+<!-- body -->
+<rect x="64" y="128" width="72" height="58" rx="16" fill="url(#rbBody)" stroke="#33425f" stroke-width="2"/>
+<rect x="80" y="142" width="40" height="20" rx="6" fill="#0d1626"/>
+<circle cx="90" cy="152" r="3" fill="url(#rbAccent)"/><circle cx="100" cy="152" r="3" fill="#4FB286"/><circle cx="110" cy="152" r="3" fill="#4a8fb0"/>
+<rect x="82" y="170" width="36" height="4" rx="2" fill="#33425f"/>
+<!-- arms -->
+<rect x="44" y="132" width="14" height="40" rx="7" fill="url(#rbBody)" stroke="#33425f" stroke-width="2"/>
+<rect x="142" y="132" width="14" height="40" rx="7" fill="url(#rbBody)" stroke="#33425f" stroke-width="2"/>
+</g>
+</svg>
+</div>
+<h1 class="hero-title">Tu Pitch Perfecto<br>en 3 Minutos</h1>
+<p class="hero-subtitle">Transforma tu proyecto digital en un discurso de 180 segundos que no solo informe, sino que genere interes, construya deseo y cierre accion. El motor de optimizacion narrativa que necesitas.</p>
+<div class="hero-cta">
+<button class="btn btn-primary-custom" onclick="showSection('build')"><svg class="ic" aria-hidden="true"><use href="#i-rocket"></use></svg> Crear mi Pitch</button>
+<button class="btn btn-outline-custom" onclick="showSection('practice')"><svg class="ic" aria-hidden="true"><use href="#i-play-circle"></use></svg> Practicar</button>
+</div>
+</div>
+</div>
+
+<div class="container">
+<div class="timer-display">
+<div class="timer-circle">
+<svg width="180" height="180" viewBox="0 0 180 180">
+<defs><linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#E8621A"/><stop offset="100%" style="stop-color:#f0a830"/></linearGradient></defs>
+<circle class="timer-circle-bg" cx="90" cy="90" r="80"/>
+<circle class="timer-circle-progress" id="timerCircleProgress" cx="90" cy="90" r="80"/>
+</svg>
+<div class="timer-text" id="heroTimer">03:00</div>
+</div>
+<div class="timer-label">Tiempo Total del Pitch</div>
+<div class="timer-phases">
+<span class="phase-badge phase-hook" id="phase-badge-hook">HOOK 15s</span>
+<span class="phase-badge phase-interest" id="phase-badge-interest">INTERES 30s</span>
+<span class="phase-badge phase-desire active" id="phase-badge-desire">DESEO 60s</span>
+<span class="phase-badge phase-action" id="phase-badge-action">ACCION 45s</span>
+<span class="phase-badge phase-close" id="phase-badge-close">CIERRE 30s</span>
+</div>
+</div>
+</div>
+
+<div class="container py-5">
+<div class="row g-4">
+<div class="col-md-6 col-lg-3">
+<div class="craft-card">
+<div class="craft-card-icon" style="background:rgba(239,68,68,0.2);color:var(--hook-color)"><svg class="ic" aria-hidden="true"><use href="#i-lightning-charge"></use></svg></div>
+<h4>Hook Impactante</h4>
+<p>Captura la atencion en los primeros 15 segundos con un gancho narrativo que detenga el scroll mental de tu audiencia.</p>
+</div>
+</div>
+<div class="col-md-6 col-lg-3">
+<div class="craft-card">
+<div class="craft-card-icon" style="background:rgba(245,158,11,0.2);color:var(--interest-color)"><svg class="ic" aria-hidden="true"><use href="#i-graph-up-arrow"></use></svg></div>
+<h4>Propuesta de Valor</h4>
+<p>Define tu diferenciacion con una matriz visual comparativa que muestre por que tu solucion es unica.</p>
+</div>
+</div>
+<div class="col-md-6 col-lg-3">
+<div class="craft-card">
+<div class="craft-card-icon" style="background:rgba(232,98,26,0.2);color:var(--desire-color)"><svg class="ic" aria-hidden="true"><use href="#i-people"></use></svg></div>
+<h4>Audiencia Adaptativa</h4>
+<p>Tres perfiles configurables: Inversor, Partner y Cliente. Cada uno con pesos y tonos diferenciados.</p>
+</div>
+</div>
+<div class="col-md-6 col-lg-3">
+<div class="craft-card">
+<div class="craft-card-icon" style="background:rgba(16,185,129,0.2);color:var(--accent)"><svg class="ic" aria-hidden="true"><use href="#i-stopwatch"></use></svg></div>
+<h4>Practica Cronometrada</h4>
+<p>Simulador con temporizador, grabacion de audio y analisis de tiempo por fase para perfeccionar tu delivery.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="container py-4">
+<div class="section-card">
+<div class="section-header">
+<div class="section-number">5</div>
+<h3 class="section-title">Estructura del Elevator Pitch</h3>
+</div>
+<div class="phase-timeline">
+<div class="phase-node"><div class="phase-node-dot active" id="timeline-dot-0"></div><div class="phase-node-label">Hook</div><div class="phase-node-time">0-15s</div></div>
+<div class="phase-connector" id="timeline-conn-0"></div>
+<div class="phase-node"><div class="phase-node-dot" id="timeline-dot-1"></div><div class="phase-node-label">Problema</div><div class="phase-node-time">15-45s</div></div>
+<div class="phase-connector" id="timeline-conn-1"></div>
+<div class="phase-node"><div class="phase-node-dot" id="timeline-dot-2"></div><div class="phase-node-label">Solucion</div><div class="phase-node-time">45-105s</div></div>
+<div class="phase-connector" id="timeline-conn-2"></div>
+<div class="phase-node"><div class="phase-node-dot" id="timeline-dot-3"></div><div class="phase-node-label">Accion</div><div class="phase-node-time">105-150s</div></div>
+<div class="phase-connector" id="timeline-conn-3"></div>
+<div class="phase-node"><div class="phase-node-dot" id="timeline-dot-4"></div><div class="phase-node-label">Cierre</div><div class="phase-node-time">150-180s</div></div>
+</div>
+<p style="text-align:center;color:var(--text-muted);font-size:0.9rem">Cada fase tiene un tiempo asignado que garantiza el equilibrio narrativo de tu pitch. El sistema te alerta si excedes el tiempo de cada seccion.</p>
+</div>
+</div>
+
+<div class="container py-4">
+<div class="section-card">
+<div class="section-header">
+<div class="section-number" style="background:linear-gradient(135deg,var(--accent),#059669)"><svg class="ic" aria-hidden="true"><use href="#i-folder"></use></svg></div>
+<h3 class="section-title">Tus Pitches Guardados</h3>
+</div>
+<div id="savedPitchesList">
+<p style="color:var(--text-muted);text-align:center;padding:2rem"><svg class="ic" style="font-size:2rem;display:block;margin-bottom:0.5rem" aria-hidden="true"><use href="#i-inbox"></use></svg>No tienes pitches guardados aun. Crea tu primero!</p>
+</div>
+</div>
+</div>
+</section>
+
+<section id="section-build" class="section-content" style="display:none">
+<div class="container py-4">
+<div class="hero-section" style="padding:2rem 0">
+<h2 style="font-size:2rem;font-weight:800;margin-bottom:0.5rem">Construye tu Pitch</h2>
+<p class="hero-subtitle" style="margin-bottom:0">Completa los 7 puntos estructurales para generar tu infografia interactiva.</p>
+</div>
+
+<div class="progress-track"><div class="progress-fill" id="buildProgress" style="width:0%"></div></div>
+<p style="text-align:center;color:var(--text-muted);font-size:0.85rem;margin-bottom:2rem">Progreso: <span id="progressText">0/7 completados</span></p>
+
+<div class="section-card" style="border-color:var(--primary)">
+<div class="section-header">
+<div class="section-number"><svg class="ic" aria-hidden="true"><use href="#i-mortarboard-fill"></use></svg></div>
+<h3 class="section-title">Registro del Estudiante</h3>
+</div>
+<p style="color:var(--text-muted);margin-bottom:1rem;font-size:0.9rem">Identifícate antes de comenzar. Tus datos quedan guardados en este dispositivo (no se envían a ningún servidor) y se incluirán en el prompt y en los archivos que exportes.</p>
+<div class="row g-3">
+<div class="col-md-6"><label class="form-label-custom">Nombres</label><input type="text" class="form-control-custom" id="studentFirstName" placeholder="Ej: Mario Rafael" oninput="saveStudent()"></div>
+<div class="col-md-6"><label class="form-label-custom">Apellidos</label><input type="text" class="form-control-custom" id="studentLastName" placeholder="Ej: Quiroz Martínez" oninput="saveStudent()"></div>
+<div class="col-12"><label class="form-label-custom">Correo electrónico</label><input type="email" class="form-control-custom" id="studentEmail" placeholder="Ej: c12139@utp.edu.pe" oninput="saveStudent()"><small id="emailHint" style="font-size:0.75rem;color:var(--text-muted)"></small></div>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-primary-custom" onclick="loadDemo()"><svg class="ic" aria-hidden="true"><use href="#i-lightning-charge-fill"></use></svg> Insertar demo guiado</button>
+<button class="btn btn-outline-custom" onclick="clearBuild()"><svg class="ic" aria-hidden="true"><use href="#i-eraser"></use></svg> Limpiar campos</button>
+<button class="btn btn-outline-custom" onclick="openPromptModal()"><svg class="ic" aria-hidden="true"><use href="#i-stars"></use></svg> Generar prompt de optimización</button>
+</div>
+<p style="color:var(--text-muted);font-size:0.8rem;margin-top:0.75rem"><svg class="ic" aria-hidden="true"><use href="#i-info-circle"></use></svg> <strong>¿Qué hace el demo?</strong> Rellena cada campo con un ejemplo modelo para que veas el <em>tipo</em> y la <em>extensión</em> de información esperada. Reemplázalo con tu propio proyecto.</p>
+</div>
+
+<div class="section-card">
+<div class="section-header">
+<div class="section-number" style="background:linear-gradient(135deg,var(--secondary),#f97316)">0</div>
+<h3 class="section-title">Perfil de Audiencia</h3>
+</div>
+<p style="color:var(--text-muted);margin-bottom:1rem;font-size:0.9rem">Selecciona quien escuchara tu pitch. El sistema adaptara el tono, los enfasis y la estructura visual.</p>
+<div class="audience-selector">
+<div class="audience-btn selected" data-audience="investor" onclick="selectAudience('investor')"><svg class="ic" aria-hidden="true"><use href="#i-cash-coin"></use></svg><span>Inversor</span></div>
+<div class="audience-btn" data-audience="partner" onclick="selectAudience('partner')"><svg class="ic" aria-hidden="true"><use href="#i-handshake"></use></svg><span>Partner</span></div>
+<div class="audience-btn" data-audience="client" onclick="selectAudience('client')"><svg class="ic" aria-hidden="true"><use href="#i-person-check"></use></svg><span>Cliente</span></div>
+<div class="audience-btn" data-audience="other" onclick="selectAudience('other')"><svg class="ic" aria-hidden="true"><use href="#i-sliders"></use></svg><span>Personalizado</span></div>
+</div>
+<div id="audienceWeights" style="margin-top:1rem;padding:1rem;background:var(--darker);border-radius:12px;display:none">
+<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0.75rem">Ponderacion por seccion (debe sumar 100%):</p>
+<div class="row g-2">
+<div class="col-6"><label class="form-label-custom">Hook (%)</label><input type="number" class="form-control-custom" id="weight-hook" value="8" min="1" max="50" onchange="validateWeights()"></div>
+<div class="col-6"><label class="form-label-custom">Interes (%)</label><input type="number" class="form-control-custom" id="weight-interest" value="17" min="1" max="50" onchange="validateWeights()"></div>
+<div class="col-6"><label class="form-label-custom">Deseo (%)</label><input type="number" class="form-control-custom" id="weight-desire" value="33" min="1" max="50" onchange="validateWeights()"></div>
+<div class="col-6"><label class="form-label-custom">Accion (%)</label><input type="number" class="form-control-custom" id="weight-action" value="25" min="1" max="50" onchange="validateWeights()"></div>
+<div class="col-6"><label class="form-label-custom">Cierre (%)</label><input type="number" class="form-control-custom" id="weight-close" value="17" min="1" max="50" onchange="validateWeights()"></div>
+</div>
+<p id="weightError" style="color:var(--danger);font-size:0.8rem;margin-top:0.5rem;display:none">La suma debe ser 100%</p>
+</div>
+</div>
+
+<div class="section-card">
+<div class="section-header"><div class="section-number">1</div><h3 class="section-title">Nombre del Proyecto</h3></div>
+<div class="mb-3">
+<label class="form-label-custom">Nombre de tu proyecto</label>
+<input type="text" class="form-control-custom" id="projectName" placeholder="Ej: PitchCraft, EcoTrack, MediBot..." oninput="updateProgress();updateCharCount('projectName','nameCount',50)">
+<small style="color:#475569;font-size:0.75rem"><span id="nameCount">0</span>/50 caracteres</small>
+</div>
+<div class="mb-3">
+<label class="form-label-custom">Tagline (max. 60 caracteres)</label>
+<input type="text" class="form-control-custom" id="projectTagline" placeholder="Una frase que capture la esencia" maxlength="60" oninput="updateProgress();updateCharCount('projectTagline','taglineCount',60)">
+<small style="color:#475569;font-size:0.75rem"><span id="taglineCount">0</span>/60 caracteres</small>
+</div>
+<div class="mb-0">
+<label class="form-label-custom">URL del proyecto (opcional)</label>
+<input type="url" class="form-control-custom" id="projectUrl" placeholder="https://...">
+</div>
+</div>
+
+<div class="section-card">
+<div class="section-header"><div class="section-number">2</div><h3 class="section-title">Proposito y Propuesta de Valor</h3></div>
+<div class="mb-3">
+<label class="form-label-custom">Que problema resuelves? (max. 200 caracteres)</label>
+<textarea class="form-control-custom" id="problemStatement" placeholder="Describe el problema que tu proyecto aborda..." maxlength="200" oninput="updateProgress();updateCharCount('problemStatement','problemCount',200)"></textarea>
+<small style="color:#475569;font-size:0.75rem"><span id="problemCount">0</span>/200 caracteres</small>
+</div>
+<div class="mb-3">
+<label class="form-label-custom">Cual es tu solucion? (max. 200 caracteres)</label>
+<textarea class="form-control-custom" id="solutionStatement" placeholder="Explica como tu proyecto resuelve el problema..." maxlength="200" oninput="updateProgress();updateCharCount('solutionStatement','solutionCount',200)"></textarea>
+<small style="color:#475569;font-size:0.75rem"><span id="solutionCount">0</span>/200 caracteres</small>
+</div>
+<div class="mb-0">
+<label class="form-label-custom">Propuesta de valor unica (max. 120 caracteres)</label>
+<input type="text" class="form-control-custom" id="valueProp" placeholder="Por que eres diferente?" maxlength="120" oninput="updateProgress();updateCharCount('valueProp','valueCount',120)">
+<small style="color:#475569;font-size:0.75rem"><span id="valueCount">0</span>/120 caracteres</small>
+</div>
+</div>
+
+<div class="section-card">
+<div class="section-header"><div class="section-number">3</div><h3 class="section-title">Publico Objetivo</h3></div>
+<div class="mb-3">
+<label class="form-label-custom">Quien es tu usuario ideal?</label>
+<input type="text" class="form-control-custom" id="targetUser" placeholder="Ej: Profesionales de marketing de 25-40 anos" oninput="updateProgress()">
+</div>
+<div class="mb-3">
+<label class="form-label-custom">Tamano del mercado (TAM/SAM/SOM)</label>
+<div class="row g-2">
+<div class="col-md-4"><input type="text" class="form-control-custom" id="tam" placeholder="TAM (Total)"></div>
+<div class="col-md-4"><input type="text" class="form-control-custom" id="sam" placeholder="SAM (Serviceable)"></div>
+<div class="col-md-4"><input type="text" class="form-control-custom" id="som" placeholder="SOM (Obtainable)"></div>
+</div>
+</div>
+<div class="mb-0">
+<label class="form-label-custom">Dolor principal del usuario</label>
+<textarea class="form-control-custom" id="userPain" placeholder="Que frustracion resuelves?" oninput="updateProgress()"></textarea>
+</div>
+</div>
+
+<div class="section-card">
+<div class="section-header"><div class="section-number">4</div><h3 class="section-title">Diferenciadores Competitivos</h3></div>
+<div class="mb-3">
+<label class="form-label-custom">Competidor principal</label>
+<input type="text" class="form-control-custom" id="competitor" placeholder="Nombre del competidor directo" oninput="updateProgress()">
+</div>
+<div class="mb-3">
+<label class="form-label-custom">Tus 3 ventajas clave (separadas por comas)</label>
+<input type="text" class="form-control-custom" id="advantages" placeholder="Ej: Velocidad 10x mayor, Precio 50% menor, API abierta" oninput="updateProgress()">
+</div>
+<div class="mb-0">
+<label class="form-label-custom">Barrera de entrada / moat</label>
+<input type="text" class="form-control-custom" id="moat" placeholder="Que te hace dificil de copiar?" oninput="updateProgress()">
+</div>
+</div>
+
+<div class="section-card">
+<div class="section-header"><div class="section-number">5</div><h3 class="section-title">Diseno y Estilo Visual</h3></div>
+<div class="mb-3">
+<label class="form-label-custom">Paleta de colores</label>
+<div class="audience-selector" style="margin-bottom:0">
+<div class="audience-btn selected" data-theme="confidence" onclick="selectTheme('confidence')" style="min-width:100px"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#1e3a5f,#2563eb)"></div><span>Confianza</span></div>
+<div class="audience-btn" data-theme="energy" onclick="selectTheme('energy')" style="min-width:100px"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#dc2626,#f59e0b)"></div><span>Energia</span></div>
+<div class="audience-btn" data-theme="calm" onclick="selectTheme('calm')" style="min-width:100px"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#059669,#10b981)"></div><span>Calma</span></div>
+<div class="audience-btn" data-theme="innovation" onclick="selectTheme('innovation')" style="min-width:100px"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#ec4899)"></div><span>Innovacion</span></div>
+</div>
+</div>
+<div class="mb-3">
+<label class="form-label-custom">Estilo de layout</label>
+<select class="form-control-custom" id="layoutStyle">
+<option value="linear">Lineal Narrativo</option>
+<option value="radial">Radial Centrado</option>
+<option value="zigzag">Zigzag Dinamico</option>
+</select>
+</div>
+<div class="mb-0">
+<label class="form-label-custom">Tipografia principal</label>
+<select class="form-control-custom" id="fontChoice">
+<option value="inter">Inter (Moderno)</option>
+<option value="playfair">Playfair (Elegante)</option>
+<option value="roboto">Roboto (Tecnico)</option>
+<option value="poppins">Poppins (Amigable)</option>
+</select>
+</div>
+</div>
+
+<div class="section-card">
+<div class="section-header"><div class="section-number">6</div><h3 class="section-title">Demo y Funcionalidades</h3></div>
+<div class="mb-3">
+<label class="form-label-custom">Demo URL o descripcion de la funcionalidad clave</label>
+<input type="text" class="form-control-custom" id="demoUrl" placeholder="URL de demo o descripcion de la funcionalidad estrella" oninput="updateProgress()">
+</div>
+<div class="mb-3">
+<label class="form-label-custom">3 funcionalidades principales (separadas por comas)</label>
+<input type="text" class="form-control-custom" id="features" placeholder="Ej: Analisis automatico, Exportacion PDF, Integracion API" oninput="updateProgress()">
+</div>
+<div class="mb-0">
+<label class="form-label-custom">Proximo hito / roadmap</label>
+<input type="text" class="form-control-custom" id="roadmap" placeholder="Que viene despues?" oninput="updateProgress()">
+</div>
+</div>
+
+<div class="section-card">
+<div class="section-header"><div class="section-number">7</div><h3 class="section-title">Tecnologia y Stack</h3></div>
+<div class="mb-3">
+<label class="form-label-custom">Stack tecnologico (separado por comas)</label>
+<input type="text" class="form-control-custom" id="techStack" placeholder="Ej: React, Node.js, PostgreSQL, AWS" oninput="updateProgress()">
+</div>
+<div class="mb-3">
+<label class="form-label-custom">Arquitectura</label>
+<select class="form-control-custom" id="architecture">
+<option value="monolith">Monolitica</option>
+<option value="microservices">Microservicios</option>
+<option value="serverless">Serverless</option>
+<option value="hybrid">Hibrida</option>
+</select>
+</div>
+<div class="mb-0">
+<label class="form-label-custom">Ventaja tecnologica</label>
+<input type="text" class="form-control-custom" id="techAdvantage" placeholder="Que tecnologia te da ventaja?" oninput="updateProgress()">
+</div>
+</div>
+
+<div class="d-flex gap-3 justify-content-center py-4">
+<button class="btn btn-primary-custom" onclick="savePitch()"><svg class="ic" aria-hidden="true"><use href="#i-save"></use></svg> Guardar Pitch</button>
+<button class="btn btn-outline-custom" onclick="showSection('visualize')"><svg class="ic" aria-hidden="true"><use href="#i-eye"></use></svg> Visualizar</button>
+</div>
+
+<div class="section-card" style="margin-top:1rem">
+<div class="section-header">
+<div class="section-number"><svg class="ic" aria-hidden="true"><use href="#i-journal-bookmark-fill"></use></svg></div>
+<h3 class="section-title">Fundamentación metodológica</h3>
+</div>
+<p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1rem">La estructura de cinco fases (Hook · Interés · Deseo · Acción · Cierre) y el ciclo construir → visualizar → practicar de esta herramienta se apoyan en marcos consolidados de comunicación persuasiva, diseño de información y aprendizaje experiencial:</p>
+<ul style="font-size:0.85rem;line-height:1.7;color:var(--text);padding-left:1.1rem">
+<li><strong>Modelo AIDA (Atención–Interés–Deseo–Acción).</strong> Origen atribuido a la jerarquía de efectos publicitarios de E. St. Elmo Lewis (1898), formalizada posteriormente por Strong, E. K. (1925). <em>The Psychology of Selling and Advertising.</em> McGraw-Hill. Sustenta la secuencia Hook→Interés→Deseo→Acción.</li>
+<li><strong>Narrativa de pitch y arco de presentación.</strong> Duarte, N. (2010). <em>Resonate: Present Visual Stories that Transform Audiences.</em> Wiley. Justifica el cierre (Close) como retorno a la idea-fuerza y llamada a la acción.</li>
+<li><strong>Diseño de información y carga cognitiva.</strong> Tufte, E. R. (1990). <em>Envisioning Information.</em> Graphics Press. / Mayer, R. E. (2009). <em>Multimedia Learning</em> (2nd ed.). Cambridge University Press. https://doi.org/10.1017/CBO9780511811678. Fundamenta la visualización por fases y la jerarquía visual de la infografía generada.</li>
+<li><strong>Aprendizaje experiencial.</strong> Kolb, D. A. (1984). <em>Experiential Learning: Experience as the Source of Learning and Development.</em> Prentice Hall. Sustenta el ciclo construir–visualizar–practicar (experiencia concreta → observación reflexiva → experimentación activa).</li>
+<li><strong>Práctica deliberada y temporización.</strong> Ericsson, K. A., Krampe, R. T., &amp; Tesch-Römer, C. (1993). The role of deliberate practice in the acquisition of expert performance. <em>Psychological Review, 100</em>(3), 363–406. https://doi.org/10.1037/0033-295X.100.3.363. Justifica el cronómetro por fases y el historial de ensayos.</li>
+</ul>
+<p style="color:var(--text-muted);font-size:0.75rem;margin-top:0.75rem"><svg class="ic" aria-hidden="true"><use href="#i-exclamation-circle"></use></svg> Verifica cada referencia y adáptala al estilo de citación de tu curso (APA 7.ª ed. mostrado arriba). Confirma las ediciones y DOIs antes de incluirlas en un entregable formal.</p>
+</div>
+</div>
+</section>
+
+<section id="section-visualize" class="section-content" style="display:none">
+<div class="container py-4">
+<div class="hero-section" style="padding:2rem 0">
+<h2 style="font-size:2rem;font-weight:800;margin-bottom:0.5rem">Visualiza tu Pitch</h2>
+<p class="hero-subtitle" style="margin-bottom:0">Infografia interactiva generada a partir de tus datos.</p>
+</div>
+
+<div class="preview-stage" id="infographicPreview">
+<canvas id="vizShader" class="viz-shader" aria-hidden="true"></canvas>
+<div class="preview-slide active" id="slide-0">
+<div style="text-align:center;padding:3rem 1rem">
+<div style="width:80px;height:80px;background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2.5rem;color:white"><svg class="ic" aria-hidden="true"><use href="#i-bullseye"></use></svg></div>
+<h3 id="previewTitle">PitchCraft Interactive</h3>
+<p id="previewTagline" style="font-size:1.2rem;color:var(--primary)">Tu pitch perfecto en 3 minutos, visualizado</p>
+<div style="margin-top:2rem;padding:1rem;background:rgba(232,98,26,0.1);border-radius:12px;border:1px solid rgba(232,98,26,0.3)">
+<p style="margin:0;font-size:0.9rem;color:var(--text-muted)"><svg class="ic" aria-hidden="true"><use href="#i-clock"></use></svg> Duracion: 3 minutos | <svg class="ic" aria-hidden="true"><use href="#i-people"></use></svg> Audiencia: <span id="previewAudience">Inversor</span></p>
+</div>
+</div>
+</div>
+
+<div class="preview-slide" id="slide-1">
+<h3><svg class="ic" style="color:var(--hook-color)" aria-hidden="true"><use href="#i-exclamation-triangle"></use></svg> El Problema</h3>
+<p id="previewProblem">Los emprendedores digitales no tienen una herramienta estructurada para condensar su valor en un formato de 3 minutos que genere accion inmediata.</p>
+<div style="margin-top:1.5rem;padding:1rem;background:rgba(239,68,68,0.1);border-radius:12px;border-left:4px solid var(--hook-color)">
+<p style="margin:0;font-size:0.9rem;color:var(--text-muted)"><strong style="color:var(--hook-color)">Dolor del usuario:</strong> <span id="previewPain">Ansiedad por la improvisacion y falta de estructura en presentaciones</span></p>
+</div>
+</div>
+
+<div class="preview-slide" id="slide-2">
+<h3><svg class="ic" style="color:var(--interest-color)" aria-hidden="true"><use href="#i-lightbulb"></use></svg> La Solucion</h3>
+<p id="previewSolution">PitchCraft es un motor de optimizacion narrativa que guia al usuario a traves de 7 puntos estructurales, generando una infografia interactiva y una URL viva para compartir.</p>
+<div style="margin-top:1.5rem">
+<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0.5rem"><strong>Funcionalidades clave:</strong></p>
+<div id="previewFeatures" style="display:flex;flex-wrap:wrap;gap:0.5rem">
+<span style="background:rgba(245,158,11,0.2);color:var(--interest-color);padding:0.35rem 0.75rem;border-radius:20px;font-size:0.8rem;font-weight:600">Secuenciador de escenas</span>
+<span style="background:rgba(245,158,11,0.2);color:var(--interest-color);padding:0.35rem 0.75rem;border-radius:20px;font-size:0.8rem;font-weight:600">Visualizacion Canvas</span>
+<span style="background:rgba(245,158,11,0.2);color:var(--interest-color);padding:0.35rem 0.75rem;border-radius:20px;font-size:0.8rem;font-weight:600">Practica cronometrada</span>
+</div>
+</div>
+</div>
+
+<div class="preview-slide" id="slide-3">
+<h3><svg class="ic" style="color:var(--desire-color)" aria-hidden="true"><use href="#i-graph-up"></use></svg> Propuesta de Valor</h3>
+<p id="previewValue">Transforma el pitch de un acto de persuasion intuitiva en un proceso de diseno deliberado, medible y replicable.</p>
+<div style="margin-top:1.5rem;padding:1.5rem;background:var(--darker);border-radius:16px">
+<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1rem"><strong>Matriz comparativa:</strong></p>
+<div class="row g-3">
+<div class="col-md-3 col-6"><div class="metric-card"><div class="metric-value">3min</div><div class="metric-label">Formato</div></div></div>
+<div class="col-md-3 col-6"><div class="metric-card"><div class="metric-value">7pts</div><div class="metric-label">Estructura</div></div></div>
+<div class="col-md-3 col-6"><div class="metric-card"><div class="metric-value">3</div><div class="metric-label">Perfiles</div></div></div>
+<div class="col-md-3 col-6"><div class="metric-card"><div class="metric-value">inf</div><div class="metric-label">Iteraciones</div></div></div>
+</div>
+</div>
+</div>
+
+<div class="preview-slide" id="slide-4">
+<h3><svg class="ic" style="color:var(--action-color)" aria-hidden="true"><use href="#i-rocket"></use></svg> Llamado a la Accion</h3>
+<p id="previewAction">Prueba PitchCraft hoy mismo. Crea tu primer pitch en menos de 10 minutos y compartelo como una URL viva que tu audiencia puede explorar a su propio ritmo.</p>
+<div style="margin-top:1.5rem;text-align:center">
+<div style="display:inline-flex;flex-direction:column;gap:0.75rem">
+<button class="btn btn-primary-custom" style="min-width:250px" onclick="showSection('build')"><svg class="ic" aria-hidden="true"><use href="#i-pencil-square"></use></svg> Crear mi Pitch</button>
+<button class="btn btn-outline-custom" style="min-width:250px" onclick="showSection('practice')"><svg class="ic" aria-hidden="true"><use href="#i-mic"></use></svg> Practicar Ahora</button>
+</div>
+</div>
+</div>
+
+<div class="preview-slide" id="slide-5">
+<h3><svg class="ic" style="color:var(--close-color)" aria-hidden="true"><use href="#i-check-circle"></use></svg> Cierre</h3>
+<p id="previewClose">PitchCraft no produce un documento estatico. Genera una experiencia web viva que transforma el monologo acotado en un dialogo asincronico. Tu pitch, disponible 24/7.</p>
+<div style="margin-top:2rem;text-align:center;padding:2rem;background:linear-gradient(135deg,rgba(232,98,26,0.1),rgba(240,168,48,0.1));border-radius:20px;border:1px solid rgba(232,98,26,0.3)">
+<p style="font-size:1.1rem;color:var(--text);margin-bottom:0.5rem"><strong id="previewProjectName">PitchCraft Interactive</strong></p>
+<p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0"><span id="previewTech">React, Node.js, PostgreSQL</span> | <span id="previewArchitecture">Microservicios</span></p>
+</div>
+</div>
+
+<div class="preview-nav">
+<button class="btn btn-outline-custom" onclick="prevSlide()" id="btnPrev"><svg class="ic" aria-hidden="true"><use href="#i-arrow-left"></use></svg> Anterior</button>
+<span style="color:var(--text-muted);font-size:0.9rem"><span id="slideCurrent">1</span> / <span id="slideTotal">6</span></span>
+<button class="btn btn-primary-custom" onclick="nextSlide()" id="btnNext">Siguiente <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"></use></svg></button>
+</div>
+</div>
+
+<div class="section-card mt-4">
+<div class="section-header">
+<div class="section-number" style="background:linear-gradient(135deg,var(--accent),#059669)"><svg class="ic" aria-hidden="true"><use href="#i-display"></use></svg></div>
+<h3 class="section-title">Modo Presentador</h3>
+</div>
+<p style="color:var(--text-muted);margin-bottom:1rem">Activa el modo pantalla completa para presentar tu pitch. Las notas del presentador apareceran en un panel secundario.</p>
+<div class="d-flex gap-3">
+<button class="btn btn-primary-custom" onclick="enterPresentationMode()"><svg class="ic" aria-hidden="true"><use href="#i-fullscreen"></use></svg> Pantalla Completa</button>
+<button class="btn btn-outline-custom" onclick="autoPlaySlides()"><svg class="ic" aria-hidden="true"><use href="#i-play"></use></svg> Auto-play (3min)</button>
+</div>
+<div class="radar-stats" id="radarStats">
+<div class="radar-ring" id="radarRing">
+<div class="ringc" style="width:200px;height:200px"></div>
+<div class="ringc" style="width:145px;height:145px"></div>
+<div class="ringc" style="width:90px;height:90px"></div>
+<div class="ringc" style="width:40px;height:40px"></div>
+<div class="sweep"></div>
+<div class="center-val"><b id="radarReady">0%</b><small>preparación</small></div>
+</div>
+<div class="phase-bars" id="phaseBars"></div>
+</div>
+</div>
+
+<div class="section-card mt-4">
+<div class="section-header">
+<div class="section-number" style="background:linear-gradient(135deg,var(--secondary),#f97316)"><svg class="ic" aria-hidden="true"><use href="#i-radar"></use></svg></div>
+<h3 class="section-title">Analisis de Fortalezas</h3>
+</div>
+<div class="radar-container">
+<canvas id="radarCanvas" width="400" height="400"></canvas>
+</div>
+</div>
+</div>
+</section>
+
+<section id="section-practice" class="section-content" style="display:none">
+<div class="container py-4">
+<div class="hero-section" style="padding:2rem 0">
+<h2 style="font-size:2rem;font-weight:800;margin-bottom:0.5rem">Practica tu Pitch</h2>
+<p class="hero-subtitle" style="margin-bottom:0">Ensaya, mide y perfecciona tu delivery con el simulador.</p>
+</div>
+
+<div class="practice-mode mb-4">
+<div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-bottom:0.5rem">
+<span class="phase-badge phase-hook active" id="practicePhase">HOOK</span>
+</div>
+<div class="practice-timer" id="practiceTimer">03:00</div>
+<div style="color:var(--text-muted);font-size:0.9rem">
+<span id="practiceModeLabel">Modo: Ensayo</span> | <span id="practicePhaseTime">Fase: 0-15s</span>
+</div>
+<div class="practice-controls">
+<button class="practice-btn" id="btnPlay" onclick="togglePractice()" title="Iniciar/Pausar"><svg class="ic" aria-hidden="true"><use href="#i-play-fill"></use></svg></button>
+<button class="practice-btn" onclick="resetPractice()" title="Reiniciar"><svg class="ic" aria-hidden="true"><use href="#i-arrow-counterclockwise"></use></svg></button>
+<button class="practice-btn" onclick="toggleRecording()" id="btnRecord" title="Grabar"><svg class="ic" aria-hidden="true"><use href="#i-mic"></use></svg></button>
+</div>
+<div id="recordingStatus" style="margin-top:1rem;display:none">
+<span class="recording-indicator"><span class="recording-dot"></span> Grabando...</span>
+</div>
+<div class="audio-visualizer" id="audioVisualizer" style="display:none">
+</div>
+</div>
+
+<div class="section-card">
+<div class="section-header">
+<div class="section-number" style="background:linear-gradient(135deg,var(--danger),#b91c1c)"><svg class="ic" aria-hidden="true"><use href="#i-speedometer2"></use></svg></div>
+<h3 class="section-title">Metricas de Practica</h3>
+</div>
+<div class="row g-3">
+<div class="col-md-3 col-6"><div class="metric-card"><div class="metric-value" id="metricTime">0:00</div><div class="metric-label">Tiempo Total</div></div></div>
+<div class="col-md-3 col-6"><div class="metric-card"><div class="metric-value" id="metricWords">0</div><div class="metric-label">Palabras/min</div></div></div>
+<div class="col-md-3 col-6"><div class="metric-card"><div class="metric-value" id="metricPhase">-</div><div class="metric-label">Fase Actual</div></div></div>
+<div class="col-md-3 col-6"><div class="metric-card"><div class="metric-value" id="metricScore">0</div><div class="metric-label">Score</div></div></div>
+</div>
+<div style="margin-top:1.5rem">
+<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0.5rem"><strong>Heatmap de atencion:</strong></p>
+<div class="heatmap-container" id="practiceHeatmap">
+</div>
+</div>
+</div>
+
+<div class="section-card">
+<div class="section-header">
+<div class="section-number" style="background:linear-gradient(135deg,var(--primary-dark),var(--gradient-end))"><svg class="ic" aria-hidden="true"><use href="#i-sliders"></use></svg></div>
+<h3 class="section-title">Modos de Practica</h3>
+</div>
+<div class="custom-tabs">
+<button class="custom-tab active" onclick="setPracticeMode('rehearsal')">Ensayo</button>
+<button class="custom-tab" onclick="setPracticeMode('guided')">Guiado</button>
+<button class="custom-tab" onclick="setPracticeMode('timed')">Contrarreloj</button>
+</div>
+<div class="tab-content active" id="tab-rehearsal">
+<p style="color:var(--text-muted)">Modo libre. Practica tu pitch completo sin restricciones. El cronometro registra tu tiempo pero no genera alertas.</p>
+</div>
+<div class="tab-content" id="tab-guided">
+<p style="color:var(--text-muted)">La plataforma te guia por las fases y tu debes sincronizarte. Alertas visuales cuando excedes el tiempo de cada fase.</p>
+</div>
+<div class="tab-content" id="tab-timed">
+<p style="color:var(--text-muted)">El tiempo total se reduce en cada iteracion para forzar concision. Empieza con 3 minutos, luego 2:30, 2:00...</p>
+</div>
+</div>
+
+<div class="section-card">
+<div class="section-header">
+<div class="section-number" style="background:linear-gradient(135deg,#7c3aed,#a855f7)"><svg class="ic" aria-hidden="true"><use href="#i-journal-text"></use></svg></div>
+<h3 class="section-title">Historial de Ensayos</h3>
+</div>
+<div id="practiceHistory">
+<p style="color:var(--text-muted);text-align:center;padding:2rem"><svg class="ic" style="font-size:2rem;display:block;margin-bottom:0.5rem" aria-hidden="true"><use href="#i-clock-history"></use></svg>No hay ensayos registrados aun.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section id="section-share" class="section-content" style="display:none">
+<div class="container py-4">
+<div class="hero-section" style="padding:2rem 0">
+<h2 style="font-size:2rem;font-weight:800;margin-bottom:0.5rem">Comparte tu Pitch</h2>
+<p class="hero-subtitle" style="margin-bottom:0">Distribuye tu infografia interactiva y mide el engagement.</p>
+</div>
+
+<div class="section-card">
+<div class="section-header">
+<div class="section-number" style="background:linear-gradient(135deg,var(--accent),#059669)"><svg class="ic" aria-hidden="true"><use href="#i-link-45deg"></use></svg></div>
+<h3 class="section-title">URL de tu Pitch</h3>
+</div>
+<p style="color:var(--text-muted);margin-bottom:1rem">Comparte esta URL unica. Podras ver quien la abre, cuanto tiempo dedica a cada seccion y desde que dispositivo.</p>
+<div class="share-url" id="shareUrl">
+<span id="shareUrlText">https://pitchcraft.app/p/demo-pitch-123</span>
+<button class="btn btn-outline-custom" style="padding:0.5rem 1rem;font-size:0.85rem" onclick="copyUrl()"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"></use></svg> Copiar</button>
+</div>
+<div class="d-flex gap-3 mt-3">
+<button class="btn btn-primary-custom" onclick="shareNative()"><svg class="ic" aria-hidden="true"><use href="#i-share"></use></svg> Compartir</button>
+<button class="btn btn-outline-custom" onclick="generateQR()"><svg class="ic" aria-hidden="true"><use href="#i-qr-code"></use></svg> QR Code</button>
+<button class="btn btn-outline-custom" onclick="exportEmbed()"><svg class="ic" aria-hidden="true"><use href="#i-code"></use></svg> Embed</button>
+</div>
+</div>
+
+<div class="section-card">
+<div class="section-header">
+<div class="section-number" style="background:linear-gradient(135deg,var(--secondary),#f97316)"><svg class="ic" aria-hidden="true"><use href="#i-bar-chart"></use></svg></div>
+<h3 class="section-title">Analytics</h3>
+</div>
+<div class="row g-3">
+<div class="col-md-3 col-6"><div class="metric-card"><div class="metric-value" id="analyticsOpens">0</div><div class="metric-label">Aperturas</div></div></div>
+<div class="col-md-3 col-6"><div class="metric-card"><div class="metric-value" id="analyticsTime">0s</div><div class="metric-label">Tiempo Promedio</div></div></div>
+<div class="col-md-3 col-6"><div class="metric-card"><div class="metric-value" id="analyticsConversion">0%</div><div class="metric-label">Conversion</div></div></div>
+<div class="col-md-3 col-6"><div class="metric-card"><div class="metric-value" id="analyticsScore">0</div><div class="metric-label">Pitch Score</div></div></div>
+</div>
+<div style="margin-top:1.5rem">
+<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0.5rem"><strong>Dispositivos:</strong></p>
+<div style="display:flex;gap:1rem;flex-wrap:wrap">
+<span style="background:var(--darker);padding:0.5rem 1rem;border-radius:8px;font-size:0.85rem;color:var(--text-muted)"><svg class="ic" aria-hidden="true"><use href="#i-phone"></use></svg> Mobile: 0%</span>
+<span style="background:var(--darker);padding:0.5rem 1rem;border-radius:8px;font-size:0.85rem;color:var(--text-muted)"><svg class="ic" aria-hidden="true"><use href="#i-laptop"></use></svg> Desktop: 0%</span>
+<span style="background:var(--darker);padding:0.5rem 1rem;border-radius:8px;font-size:0.85rem;color:var(--text-muted)"><svg class="ic" aria-hidden="true"><use href="#i-tablet"></use></svg> Tablet: 0%</span>
+</div>
+</div>
+</div>
+
+<div class="section-card">
+<div class="section-header">
+<div class="section-number" style="background:linear-gradient(135deg,var(--primary-dark),var(--gradient-end))"><svg class="ic" aria-hidden="true"><use href="#i-git"></use></svg></div>
+<h3 class="section-title">A/B Testing</h3>
+</div>
+<p style="color:var(--text-muted);margin-bottom:1rem">Crea dos versiones de tu pitch, distribuye aleatoriamente a receptores y compara cual genera mayor engagement.</p>
+<div class="d-flex gap-3">
+<button class="btn btn-primary-custom" onclick="createABTest()"><svg class="ic" aria-hidden="true"><use href="#i-plus-circle"></use></svg> Crear Test A/B</button>
+<button class="btn btn-outline-custom" onclick="viewABResults()"><svg class="ic" aria-hidden="true"><use href="#i-graph-up"></use></svg> Ver Resultados</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+
+<footer class="footer-custom">
+<div class="container">
+
+<div class="gooey-wrap" aria-hidden="true">
+<svg style="position:absolute;width:0;height:0" aria-hidden="true"><defs><filter id="gooey-threshold"><feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -9"/></filter></defs></svg>
+<div class="gooey-text" style="filter:url(#gooey-threshold)">
+<span id="gooey1"></span><span id="gooey2"></span>
+</div>
+</div>
+
+<div class="footer-stats" id="footerStats">
+<div class="stat-card">
+<div class="stat-num"><span class="stat-val" data-stat="progress" data-suffix="%">0</span></div>
+<div class="stat-label">Progreso del brief</div>
+<svg class="sparkline" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline data-spark="progress" fill="none" stroke="var(--primary)" stroke-width="2" points=""/></svg>
+</div>
+<div class="stat-card">
+<div class="stat-num"><span class="stat-val" data-stat="fields">0</span><span class="stat-den">/19</span></div>
+<div class="stat-label">Campos completados</div>
+<svg class="sparkline" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline data-spark="fields" fill="none" stroke="var(--secondary)" stroke-width="2" points=""/></svg>
+</div>
+<div class="stat-card">
+<div class="stat-num"><span class="stat-val" data-stat="pitches">0</span></div>
+<div class="stat-label">Infografías guardadas</div>
+<svg class="sparkline" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline data-spark="pitches" fill="none" stroke="var(--accent)" stroke-width="2" points=""/></svg>
+</div>
+<div class="stat-card">
+<div class="stat-num"><span class="stat-val" data-stat="practices">0</span></div>
+<div class="stat-label">Ensayos realizados</div>
+<svg class="sparkline" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline data-spark="practices" fill="none" stroke="var(--close-color)" stroke-width="2" points=""/></svg>
+</div>
+</div>
+
+<p style="margin-top:1.5rem"><svg class="ic" style="color:var(--primary)" aria-hidden="true"><use href="#i-bar-chart-line-fill"></use></svg> <strong>Docente:</strong> Mg. Mario Quiroz · <strong>Curso:</strong> Infografía · 2026 · Semana 14</p>
+<p style="margin-top:0.4rem;font-size:0.75rem">Constructor de infografías por fases · Metodología AIDA+Close aplicada al diseño de información · PWA, funciona offline.</p>
+</div>
+</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script>
+// ===== GLOBAL STATE =====
+let currentSection = 'home';
+let currentSlide = 0;
+let totalSlides = 6;
+let currentAudience = 'investor';
+let currentTheme = 'confidence';
+let practiceMode = 'rehearsal';
+let practiceTimer = null;
+let practiceSeconds = 180;
+let practiceRunning = false;
+let recording = false;
+let mediaRecorder = null;
+let recordedChunks = [];
+let savedPitches = JSON.parse(localStorage.getItem('pitchcraft_pitches') || '[]');
+let practiceHistory = JSON.parse(localStorage.getItem('pitchcraft_history') || '[]');
+let deferredPrompt = null;
+
+// ===== PHASE DEFINITIONS =====
+const PHASES = [
+  { name: 'HOOK', start: 0, end: 15, color: 'var(--hook-color)', label: 'Hook' },
+  { name: 'INTERES', start: 15, end: 45, color: 'var(--interest-color)', label: 'Interes' },
+  { name: 'DESEO', start: 45, end: 105, color: 'var(--desire-color)', label: 'Deseo' },
+  { name: 'ACCION', start: 105, end: 150, color: 'var(--action-color)', label: 'Accion' },
+  { name: 'CIERRE', start: 150, end: 180, color: 'var(--close-color)', label: 'Cierre' }
+];
+
+// ===== PARTICLE SYSTEM =====
+(function initParticles() {
+  const canvas = document.getElementById('particleCanvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  const maxParticles = 80;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  class Particle {
+    constructor() {
+      this.reset();
+    }
+    reset() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.size = Math.random() * 2 + 0.5;
+      this.speedX = (Math.random() - 0.5) * 0.5;
+      this.speedY = (Math.random() - 0.5) * 0.5;
+      this.opacity = Math.random() * 0.5 + 0.1;
+      this.hue = Math.random() > 0.5 ? 240 : 260;
+    }
+    update() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+      if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${this.hue}, 70%, 60%, ${this.opacity})`;
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < maxParticles; i++) {
+    particles.push(new Particle());
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.update();
+      p.draw();
+    });
+    // Draw connections
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 100) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(99, 102, 241, ${0.1 * (1 - dist / 100)})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+// ===== NAVIGATION =====
+function showSection(section) {
+  document.querySelectorAll('.section-content').forEach(s => s.style.display = 'none');
+  document.getElementById('section-' + section).style.display = 'block';
+  document.querySelectorAll('.nav-link-custom').forEach(n => n.classList.remove('active'));
+  document.getElementById('nav-' + section).classList.add('active');
+  currentSection = section;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (section === 'visualize') {
+    updatePreview();
+    drawRadarChart();
+  }
+  if (section === 'home') {
+    renderSavedPitches();
+  }
+}
+
+// ===== AUDIENCE SELECTOR =====
+function selectAudience(audience) {
+  currentAudience = audience;
+  document.querySelectorAll('.audience-btn').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.audience === audience);
+  });
+  const weightsDiv = document.getElementById('audienceWeights');
+  if (audience === 'other') {
+    weightsDiv.style.display = 'block';
+  } else {
+    weightsDiv.style.display = 'none';
+    const weights = {
+      investor: { hook: 8, interest: 17, desire: 33, action: 25, close: 17 },
+      partner: { hook: 10, interest: 20, desire: 35, action: 20, close: 15 },
+      client: { hook: 12, interest: 25, desire: 30, action: 20, close: 13 }
+    };
+    const w = weights[audience] || weights.investor;
+    document.getElementById('weight-hook').value = w.hook;
+    document.getElementById('weight-interest').value = w.interest;
+    document.getElementById('weight-desire').value = w.desire;
+    document.getElementById('weight-action').value = w.action;
+    document.getElementById('weight-close').value = w.close;
+  }
+}
+
+function validateWeights() {
+  const h = parseInt(document.getElementById('weight-hook').value) || 0;
+  const i = parseInt(document.getElementById('weight-interest').value) || 0;
+  const d = parseInt(document.getElementById('weight-desire').value) || 0;
+  const a = parseInt(document.getElementById('weight-action').value) || 0;
+  const c = parseInt(document.getElementById('weight-close').value) || 0;
+  const sum = h + i + d + a + c;
+  document.getElementById('weightError').style.display = sum !== 100 ? 'block' : 'none';
+}
+
+// ===== THEME SELECTOR =====
+function selectTheme(theme) {
+  currentTheme = theme;
+  document.querySelectorAll('[data-theme]').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.theme === theme);
+  });
+}
+
+// ===== PROGRESS TRACKING =====
+function updateProgress() {
+  const fields = ['projectName', 'problemStatement', 'solutionStatement', 'valueProp', 'targetUser', 'competitor', 'advantages', 'demoUrl', 'features', 'techStack'];
+  let completed = 0;
+  const requiredGroups = [
+    ['projectName'],
+    ['problemStatement', 'solutionStatement', 'valueProp'],
+    ['targetUser'],
+    ['competitor', 'advantages'],
+    ['demoUrl', 'features'],
+    ['techStack']
+  ];
+  requiredGroups.forEach(group => {
+    if (group.some(f => document.getElementById(f)?.value?.trim())) completed++;
+  });
+  const pct = Math.min((completed / 6) * 100, 100);
+  document.getElementById('buildProgress').style.width = pct + '%';
+  document.getElementById('progressText').textContent = completed + '/6 completados';
+}
+
+function updateCharCount(inputId, countId, max) {
+  const val = document.getElementById(inputId).value.length;
+  document.getElementById(countId).textContent = val;
+}
+
+// ===== SAVE PITCH =====
+function savePitch() {
+  const pitch = {
+    id: Date.now(),
+    name: document.getElementById('projectName').value || 'Pitch sin nombre',
+    tagline: document.getElementById('projectTagline').value || '',
+    audience: currentAudience,
+    theme: currentTheme,
+    data: {
+      projectName: document.getElementById('projectName').value,
+      projectTagline: document.getElementById('projectTagline').value,
+      projectUrl: document.getElementById('projectUrl').value,
+      problemStatement: document.getElementById('problemStatement').value,
+      solutionStatement: document.getElementById('solutionStatement').value,
+      valueProp: document.getElementById('valueProp').value,
+      targetUser: document.getElementById('targetUser').value,
+      tam: document.getElementById('tam').value,
+      sam: document.getElementById('sam').value,
+      som: document.getElementById('som').value,
+      userPain: document.getElementById('userPain').value,
+      competitor: document.getElementById('competitor').value,
+      advantages: document.getElementById('advantages').value,
+      moat: document.getElementById('moat').value,
+      demoUrl: document.getElementById('demoUrl').value,
+      features: document.getElementById('features').value,
+      roadmap: document.getElementById('roadmap').value,
+      techStack: document.getElementById('techStack').value,
+      architecture: document.getElementById('architecture').value,
+      techAdvantage: document.getElementById('techAdvantage').value
+    },
+    createdAt: new Date().toISOString()
+  };
+
+  savedPitches.unshift(pitch);
+  localStorage.setItem('pitchcraft_pitches', JSON.stringify(savedPitches));
+  showToast('Pitch guardado exitosamente!');
+  renderSavedPitches();
+}
+
+function renderSavedPitches() {
+  const container = document.getElementById('savedPitchesList');
+  if (savedPitches.length === 0) {
+    container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem"><svg class="ic" style="font-size:2rem;display:block;margin-bottom:0.5rem" aria-hidden="true"><use href="#i-inbox"></use></svg>No tienes pitches guardados aun. Crea tu primero!</p>';
+    return;
+  }
+  container.innerHTML = savedPitches.map(p => `
+    <div class="saved-pitch-card" onclick="loadPitch(${p.id})">
+      <div class="saved-pitch-info">
+        <h5>${p.name}</h5>
+        <p>${p.tagline || 'Sin tagline'} | ${p.audience} | ${new Date(p.createdAt).toLocaleDateString()}</p>
+      </div>
+      <div class="saved-pitch-actions" onclick="event.stopPropagation()">
+        <button onclick="loadPitch(${p.id})" title="Cargar"><svg class="ic" aria-hidden="true"><use href="#i-pencil"></use></svg></button>
+        <button onclick="deletePitch(${p.id})" title="Eliminar"><svg class="ic" aria-hidden="true"><use href="#i-trash"></use></svg></button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadPitch(id) {
+  const pitch = savedPitches.find(p => p.id === id);
+  if (!pitch) return;
+  const d = pitch.data;
+  document.getElementById('projectName').value = d.projectName || '';
+  document.getElementById('projectTagline').value = d.projectTagline || '';
+  document.getElementById('projectUrl').value = d.projectUrl || '';
+  document.getElementById('problemStatement').value = d.problemStatement || '';
+  document.getElementById('solutionStatement').value = d.solutionStatement || '';
+  document.getElementById('valueProp').value = d.valueProp || '';
+  document.getElementById('targetUser').value = d.targetUser || '';
+  document.getElementById('tam').value = d.tam || '';
+  document.getElementById('sam').value = d.sam || '';
+  document.getElementById('som').value = d.som || '';
+  document.getElementById('userPain').value = d.userPain || '';
+  document.getElementById('competitor').value = d.competitor || '';
+  document.getElementById('advantages').value = d.advantages || '';
+  document.getElementById('moat').value = d.moat || '';
+  document.getElementById('demoUrl').value = d.demoUrl || '';
+  document.getElementById('features').value = d.features || '';
+  document.getElementById('roadmap').value = d.roadmap || '';
+  document.getElementById('techStack').value = d.techStack || '';
+  document.getElementById('architecture').value = d.architecture || 'monolith';
+  document.getElementById('techAdvantage').value = d.techAdvantage || '';
+  selectAudience(pitch.audience);
+  selectTheme(pitch.theme);
+  updateProgress();
+  showToast('Pitch cargado: ' + pitch.name);
+  showSection('build');
+}
+
+function deletePitch(id) {
+  savedPitches = savedPitches.filter(p => p.id !== id);
+  localStorage.setItem('pitchcraft_pitches', JSON.stringify(savedPitches));
+  renderSavedPitches();
+  showToast('Pitch eliminado');
+}
+
+// ===== PREVIEW SLIDES =====
+function updatePreview() {
+  const name = document.getElementById('projectName').value || 'PitchCraft Interactive';
+  const tagline = document.getElementById('projectTagline').value || 'Tu pitch perfecto en 3 minutos, visualizado';
+  const problem = document.getElementById('problemStatement').value || 'Los emprendedores digitales no tienen una herramienta estructurada para condensar su valor en un formato de 3 minutos.';
+  const solution = document.getElementById('solutionStatement').value || 'PitchCraft es un motor de optimizacion narrativa que guia al usuario a traves de 7 puntos estructurales.';
+  const value = document.getElementById('valueProp').value || 'Transforma el pitch de un acto de persuasion intuitiva en un proceso de diseno deliberado, medible y replicable.';
+  const pain = document.getElementById('userPain').value || 'Ansiedad por la improvisacion y falta de estructura';
+  const features = document.getElementById('features').value || 'Secuenciador de escenas, Visualizacion Canvas, Practica cronometrada';
+  const tech = document.getElementById('techStack').value || 'React, Node.js, PostgreSQL';
+  const arch = document.getElementById('architecture').value || 'Microservicios';
+
+  document.getElementById('previewTitle').textContent = name;
+  document.getElementById('previewTagline').textContent = tagline;
+  document.getElementById('previewAudience').textContent = currentAudience.charAt(0).toUpperCase() + currentAudience.slice(1);
+  document.getElementById('previewProblem').textContent = problem;
+  document.getElementById('previewPain').textContent = pain;
+  document.getElementById('previewSolution').textContent = solution;
+  document.getElementById('previewValue').textContent = value;
+  document.getElementById('previewProjectName').textContent = name;
+  document.getElementById('previewTech').textContent = tech;
+  document.getElementById('previewArchitecture').textContent = arch;
+
+  const featList = features.split(',').map(f => f.trim()).filter(f => f);
+  const featContainer = document.getElementById('previewFeatures');
+  featContainer.innerHTML = featList.map(f => `<span style="background:rgba(245,158,11,0.2);color:var(--interest-color);padding:0.35rem 0.75rem;border-radius:20px;font-size:0.8rem;font-weight:600">${f}</span>`).join('');
+
+  // Update presentation slides too
+  document.getElementById('presTitle').textContent = name;
+  document.getElementById('presTagline').textContent = tagline;
+  document.getElementById('presProblem').textContent = problem;
+  document.getElementById('presSolution').textContent = solution;
+  document.getElementById('presValue').textContent = value;
+  document.getElementById('presClose').textContent = document.getElementById('previewClose').textContent;
+}
+
+function nextSlide() {
+  document.getElementById('slide-' + currentSlide).classList.remove('active');
+  currentSlide = (currentSlide + 1) % totalSlides;
+  document.getElementById('slide-' + currentSlide).classList.add('active');
+  document.getElementById('slideCurrent').textContent = currentSlide + 1;
+}
+
+function prevSlide() {
+  document.getElementById('slide-' + currentSlide).classList.remove('active');
+  currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+  document.getElementById('slide-' + currentSlide).classList.add('active');
+  document.getElementById('slideCurrent').textContent = currentSlide + 1;
+}
+
+// ===== PRESENTATION MODE =====
+function enterPresentationMode() {
+  document.getElementById('presentationOverlay').classList.add('active');
+  document.getElementById('presenterNotes').classList.add('show');
+  updatePresSlide(0);
+}
+
+function exitPresentationMode() {
+  document.getElementById('presentationOverlay').classList.remove('active');
+  document.getElementById('presenterNotes').classList.remove('show');
+}
+
+function nextPresSlide() {
+  updatePresSlide((currentSlide + 1) % totalSlides);
+}
+
+function prevPresSlide() {
+  updatePresSlide((currentSlide - 1 + totalSlides) % totalSlides);
+}
+
+function updatePresSlide(idx) {
+  document.querySelectorAll('#presentationOverlay .preview-slide').forEach(s => s.classList.remove('active'));
+  document.getElementById('pres-slide-' + idx).classList.add('active');
+  currentSlide = idx;
+  document.getElementById('presSlideCurrent').textContent = idx + 1;
+
+  const notes = [
+    'Manten contacto visual. Sonrie. Este es tu momento de hook.',
+    'Usa gestos abiertos. Enfatiza el dolor con tu tono de voz.',
+    'Muestra entusiasmo. Esta es la parte mas importante.',
+    'Se directo. Pide lo que necesitas con claridad.',
+    'Cierra con fuerza. Deja una pregunta abierta.',
+    'Agradece. Ofrece tu contacto. Sonrie.'
+  ];
+  document.getElementById('presenterNoteText').textContent = notes[idx] || '';
+  revealActiveSlideTitle();
+}
+
+function autoPlaySlides() {
+  enterPresentationMode();
+  let slide = 0;
+  const times = [15000, 30000, 60000, 45000, 30000];
+  function next() {
+    if (slide < totalSlides - 1) {
+      slide++;
+      updatePresSlide(slide);
+      setTimeout(next, times[slide - 1] || 30000);
+    }
+  }
+  setTimeout(next, times[0] || 15000);
+}
+
+// ===== RADAR CHART =====
+function drawRadarChart() {
+  const canvas = document.getElementById('radarCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  const cx = w / 2;
+  const cy = h / 2;
+  const radius = Math.min(w, h) / 2 - 40;
+
+  const labels = ['Claridad', 'Brevidad', 'Impacto', 'Estructura', 'Memorabilidad', 'Accion'];
+  const values = [85, 70, 90, 80, 75, 88];
+  const angleStep = (Math.PI * 2) / labels.length;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Draw grid
+  for (let i = 1; i <= 5; i++) {
+    ctx.beginPath();
+    for (let j = 0; j < labels.length; j++) {
+      const angle = j * angleStep - Math.PI / 2;
+      const r = (radius / 5) * i;
+      const x = cx + Math.cos(angle) * r;
+      const y = cy + Math.sin(angle) * r;
+      if (j === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(99, 102, 241, 0.2)';
+    ctx.stroke();
+  }
+
+  // Draw axes
+  for (let i = 0; i < labels.length; i++) {
+    const angle = i * angleStep - Math.PI / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius);
+    ctx.strokeStyle = 'rgba(99, 102, 241, 0.3)';
+    ctx.stroke();
+
+    // Labels
+    const labelX = cx + Math.cos(angle) * (radius + 25);
+    const labelY = cy + Math.sin(angle) * (radius + 25);
+    ctx.fillStyle = '#9aa6bd';
+    ctx.font = '12px Inter';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(labels[i], labelX, labelY);
+  }
+
+  // Draw data
+  ctx.beginPath();
+  for (let i = 0; i < labels.length; i++) {
+    const angle = i * angleStep - Math.PI / 2;
+    const r = (radius * values[i]) / 100;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(99, 102, 241, 0.3)';
+  ctx.fill();
+  ctx.strokeStyle = '#E8621A';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Draw points
+  for (let i = 0; i < labels.length; i++) {
+    const angle = i * angleStep - Math.PI / 2;
+    const r = (radius * values[i]) / 100;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#E8621A';
+    ctx.fill();
+  }
+}
+
+// ===== PRACTICE MODE =====
+function setPracticeMode(mode) {
+  practiceMode = mode;
+  document.querySelectorAll('.custom-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + mode).classList.add('active');
+  document.getElementById('practiceModeLabel').textContent = 'Modo: ' + mode.charAt(0).toUpperCase() + mode.slice(1);
+}
+
+function togglePractice() {
+  const btn = document.getElementById('btnPlay');
+  if (practiceRunning) {
+    clearInterval(practiceTimer);
+    practiceRunning = false;
+    btn.innerHTML = '<svg class="ic" aria-hidden="true"><use href="#i-play-fill"></use></svg>';
+    btn.classList.remove('active');
+  } else {
+    practiceRunning = true;
+    btn.innerHTML = '<svg class="ic" aria-hidden="true"><use href="#i-pause-fill"></use></svg>';
+    btn.classList.add('active');
+    practiceTimer = setInterval(() => {
+      practiceSeconds--;
+      if (practiceSeconds <= 0) {
+        clearInterval(practiceTimer);
+        practiceRunning = false;
+        btn.innerHTML = '<svg class="ic" aria-hidden="true"><use href="#i-play-fill"></use></svg>';
+        btn.classList.remove('active');
+        showToast('Tiempo! Pitch completado.');
+        savePracticeSession();
+      }
+      updatePracticeDisplay();
+    }, 1000);
+  }
+}
+
+function resetPractice() {
+  clearInterval(practiceTimer);
+  practiceRunning = false;
+  practiceSeconds = 180;
+  document.getElementById('btnPlay').innerHTML = '<svg class="ic" aria-hidden="true"><use href="#i-play-fill"></use></svg>';
+  document.getElementById('btnPlay').classList.remove('active');
+  updatePracticeDisplay();
+}
+
+function updatePracticeDisplay() {
+  const m = Math.floor(practiceSeconds / 60);
+  const s = practiceSeconds % 60;
+  document.getElementById('practiceTimer').textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+
+  const elapsed = 180 - practiceSeconds;
+  let phase = PHASES[0];
+  for (const p of PHASES) {
+    if (elapsed >= p.start && elapsed < p.end) {
+      phase = p;
+      break;
+    }
+  }
+
+  const phaseBadge = document.getElementById('practicePhase');
+  phaseBadge.textContent = phase.name;
+  phaseBadge.className = 'phase-badge active phase-' + phase.name.toLowerCase();
+  document.getElementById('practicePhaseTime').textContent = `Fase: ${phase.start}-${phase.end}s`;
+
+  // Update metrics
+  document.getElementById('metricTime').textContent = `${Math.floor(elapsed / 60)}:${(elapsed % 60).toString().padStart(2, '0')}`;
+  document.getElementById('metricPhase').textContent = phase.label;
+
+  // Update heatmap
+  updateHeatmap(elapsed);
+}
+
+function updateHeatmap(elapsed) {
+  const container = document.getElementById('practiceHeatmap');
+  if (!container.children.length) {
+    for (let i = 0; i < 25; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'heatmap-cell';
+      container.appendChild(cell);
+    }
+  }
+  const idx = Math.floor((elapsed / 180) * 25);
+  if (idx >= 0 && idx < 25) {
+    const cell = container.children[idx];
+    const rand = Math.random();
+    cell.className = 'heatmap-cell ' + (rand > 0.7 ? 'hot' : rand > 0.5 ? 'warm' : rand > 0.3 ? 'cool' : 'cold');
+  }
+}
+
+function toggleRecording() {
+  const btn = document.getElementById('btnRecord');
+  const status = document.getElementById('recordingStatus');
+  const visualizer = document.getElementById('audioVisualizer');
+
+  if (!recording) {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        mediaRecorder = new MediaRecorder(stream);
+        recordedChunks = [];
+        mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+        mediaRecorder.start();
+        recording = true;
+        btn.innerHTML = '<svg class="ic" aria-hidden="true"><use href="#i-stop-fill"></use></svg>';
+        btn.style.color = 'var(--danger)';
+        status.style.display = 'block';
+        visualizer.style.display = 'flex';
+        initAudioVisualizer();
+        showToast('Grabacion iniciada');
+      }).catch(() => showToast('No se pudo acceder al microfono'));
+    } else {
+      showToast('Tu navegador no soporta grabacion de audio');
+    }
+  } else {
+    mediaRecorder.stop();
+    recording = false;
+    btn.innerHTML = '<svg class="ic" aria-hidden="true"><use href="#i-mic"></use></svg>';
+    btn.style.color = '';
+    status.style.display = 'none';
+    visualizer.style.display = 'none';
+    showToast('Grabacion detenida');
+  }
+}
+
+function initAudioVisualizer() {
+  const container = document.getElementById('audioVisualizer');
+  container.innerHTML = '';
+  for (let i = 0; i < 30; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'audio-bar';
+    bar.style.height = '5px';
+    container.appendChild(bar);
+  }
+
+  function animate() {
+    if (!recording) return;
+    const bars = container.querySelectorAll('.audio-bar');
+    bars.forEach(bar => {
+      const h = Math.random() * 50 + 5;
+      bar.style.height = h + 'px';
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+function savePracticeSession() {
+  const session = {
+    id: Date.now(),
+    duration: 180 - practiceSeconds,
+    mode: practiceMode,
+    date: new Date().toISOString()
+  };
+  practiceHistory.unshift(session);
+  localStorage.setItem('pitchcraft_history', JSON.stringify(practiceHistory));
+  renderPracticeHistory();
+}
+
+function renderPracticeHistory() {
+  const container = document.getElementById('practiceHistory');
+  if (practiceHistory.length === 0) {
+    container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem"><svg class="ic" style="font-size:2rem;display:block;margin-bottom:0.5rem" aria-hidden="true"><use href="#i-clock-history"></use></svg>No hay ensayos registrados aun.</p>';
+    return;
+  }
+  container.innerHTML = practiceHistory.slice(0, 10).map(h => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--darker);border-radius:8px;margin-bottom:0.5rem">
+      <span style="color:var(--text);font-size:0.9rem"><svg class="ic" style="color:var(--primary)" aria-hidden="true"><use href="#i-clock"></use></svg> ${Math.floor(h.duration / 60)}:${(h.duration % 60).toString().padStart(2, '0')}</span>
+      <span style="color:var(--text-muted);font-size:0.8rem">${h.mode} | ${new Date(h.date).toLocaleDateString()}</span>
+    </div>
+  `).join('');
+}
+
+// ===== SHARE =====
+function copyUrl() {
+  const url = document.getElementById('shareUrlText').textContent;
+  navigator.clipboard.writeText(url).then(() => showToast('URL copiada al portapapeles'));
+}
+
+function shareNative() {
+  if (navigator.share) {
+    navigator.share({
+      title: 'PitchCraft - Mi Pitch',
+      text: 'Mira mi pitch de 3 minutos creado con PitchCraft',
+      url: document.getElementById('shareUrlText').textContent
+    }).catch(() => {});
+  } else {
+    copyUrl();
+  }
+}
+
+function generateQR() {
+  showToast('QR Code generado (simulado)');
+}
+
+// ===== REGISTRO DE ESTUDIANTE =====
+function saveStudent() {
+  const s = {
+    firstName: document.getElementById('studentFirstName').value.trim(),
+    lastName: document.getElementById('studentLastName').value.trim(),
+    email: document.getElementById('studentEmail').value.trim()
+  };
+  localStorage.setItem('pitchcraft_student', JSON.stringify(s));
+  const hint = document.getElementById('emailHint');
+  if (s.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s.email)) {
+    hint.textContent = 'Formato de correo no válido';
+    hint.style.color = 'var(--danger)';
+  } else {
+    hint.textContent = '';
+  }
+}
+function loadStudent() {
+  try {
+    const s = JSON.parse(localStorage.getItem('pitchcraft_student') || '{}');
+    if (s.firstName) document.getElementById('studentFirstName').value = s.firstName;
+    if (s.lastName) document.getElementById('studentLastName').value = s.lastName;
+    if (s.email) document.getElementById('studentEmail').value = s.email;
+  } catch (e) {}
+}
+loadStudent();
+
+// ===== DEMO GUIADO =====
+const DEMO_DATA = {
+  projectName: 'EcoTrack',
+  projectTagline: 'Convierte tus hábitos diarios en impacto ambiental medible',
+  projectUrl: 'https://ecotrack.demo',
+  problemStatement: 'El 73% de las personas quiere reducir su huella de carbono pero no sabe por dónde empezar ni cómo medir su progreso real.',
+  solutionStatement: 'Una app que registra acciones cotidianas (transporte, consumo, energía) y las traduce a kg de CO₂ evitado, con metas semanales gamificadas.',
+  valueProp: 'Hacemos visible y accionable lo invisible: cada decisión diaria se vuelve un dato concreto que motiva el cambio.',
+  targetUser: 'Jóvenes urbanos de 18 a 35 años, ambientalmente conscientes, usuarios intensivos de smartphone.',
+  tam: '2.4 mil millones de usuarios de apps de bienestar a nivel global',
+  sam: '180 millones en mercados hispanohablantes',
+  som: '500 mil usuarios en el primer año (Perú, México, Colombia)',
+  userPain: 'Frustración por no poder cuantificar si sus esfuerzos individuales realmente importan.',
+  competitor: 'Apps de huella de carbono genéricas y calculadoras estáticas en web.',
+  advantages: 'Medición automática vía integraciones, gamificación social y reportes accionables, no solo un número final.',
+  moat: 'Algoritmo propio de conversión calibrado con datos locales + comunidad activa que genera efecto de red.',
+  demoUrl: 'Video de 45s mostrando el registro de un trayecto en bici y el CO₂ evitado en tiempo real.',
+  features: 'Registro automático, retos semanales, panel de impacto, comparativa con amigos.',
+  roadmap: 'Q1: MVP iOS/Android · Q2: integraciones bancarias de consumo · Q3: API para empresas.',
+  techStack: 'React Native, Node.js, PostgreSQL, API de factores de emisión IPCC.',
+  architecture: 'App cliente → API REST → motor de cálculo de emisiones → base de datos + capa de analítica.',
+  techAdvantage: 'Motor de conversión calibrado regionalmente, con precisión superior a calculadoras estándar.'
+};
+function loadDemo() {
+  Object.keys(DEMO_DATA).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = DEMO_DATA[id];
+  });
+  if (typeof updateProgress === 'function') updateProgress();
+  if (typeof updatePreview === 'function') updatePreview();
+  document.querySelectorAll('[oninput*="updateCharCount"]').forEach(el => el.dispatchEvent(new Event('input')));
+  showToast('Demo guiado insertado. Revisa cada campo y reemplázalo con tu proyecto.');
+}
+function clearBuild() {
+  Object.keys(DEMO_DATA).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  if (typeof updateProgress === 'function') updateProgress();
+  if (typeof updatePreview === 'function') updatePreview();
+  document.querySelectorAll('[oninput*="updateCharCount"]').forEach(el => el.dispatchEvent(new Event('input')));
+  showToast('Campos del proyecto limpiados.');
+}
+
+// ===== GENERADOR DE PROMPT =====
+function openPromptModal() { document.getElementById('promptModal').classList.add('active'); }
+function closePromptModal() { document.getElementById('promptModal').classList.remove('active'); }
+function buildPrompt() {
+  const g = id => (document.getElementById(id)?.value || '').trim();
+  const student = `${g('studentFirstName')} ${g('studentLastName')}`.trim() || 'Estudiante';
+  const audienceMap = { investor: 'inversores', client: 'clientes', partner: 'socios estratégicos', other: 'audiencia personalizada' };
+  const audience = audienceMap[typeof currentAudience !== 'undefined' ? currentAudience : 'investor'] || 'la audiencia';
+  const context = g('promptContext') || '(no especificado)';
+  const goal = g('promptGoal');
+  const tone = g('promptTone');
+  const weights = ['hook','interest','desire','action','close']
+    .map(k => `${k}: ${document.getElementById('weight-'+k)?.value || '?'}%`).join(', ');
+
+  const prompt = `# Rol
+Actúa como diseñador de información y experto en comunicación persuasiva.
+
+# Tarea
+Optimiza la infografía y el guion de mi pitch de 3 minutos aplicando la estructura AIDA+Close (Hook → Interés → Deseo → Acción → Cierre).
+
+# Autoría
+Estudiante: ${student}
+
+# Contexto identificado
+${context}
+
+# Audiencia objetivo
+${audience}
+
+# Datos del proyecto
+- Nombre: ${g('projectName') || '(vacío)'}
+- Tagline: ${g('projectTagline') || '(vacío)'}
+- Problema: ${g('problemStatement') || '(vacío)'}
+- Solución: ${g('solutionStatement') || '(vacío)'}
+- Propuesta de valor: ${g('valueProp') || '(vacío)'}
+- Usuario objetivo: ${g('targetUser') || '(vacío)'}
+- Diferenciadores: ${g('advantages') || '(vacío)'}
+- Demo / funcionalidad clave: ${g('demoUrl') || '(vacío)'}
+
+# Ponderación por fase (peso narrativo y visual)
+${weights}
+
+# Objetivo de optimización
+${goal}
+
+# Tono
+${tone}
+
+# Marco metodológico a respetar
+- AIDA+Close (Lewis, 1898; Strong, 1925) para la secuencia persuasiva.
+- Diseño de información y reducción de carga cognitiva (Tufte, 1990; Mayer, 2009): jerarquía visual, un mensaje por bloque, datos accionables.
+- Narrativa de presentación (Duarte, 2010): el cierre retoma la idea-fuerza con llamada a la acción clara.
+
+# Entregable esperado
+1. Guion por fase (5 bloques), con duración sugerida según las ponderaciones.
+2. Recomendaciones concretas de jerarquía visual para la infografía de cada fase.
+3. Tres mejoras priorizadas para "${goal}", justificadas en el marco anterior.`;
+
+  document.getElementById('promptOutput').value = prompt;
+  document.getElementById('promptOutputWrap').style.display = 'block';
+}
+function copyPrompt() {
+  const t = document.getElementById('promptOutput');
+  navigator.clipboard.writeText(t.value).then(() => showToast('Prompt copiado al portapapeles')).catch(() => {
+    t.select(); document.execCommand('copy'); showToast('Prompt copiado');
+  });
+}
+
+// ===== FOOTER: GOOEY TEXT (vanilla port) =====
+(function gooey() {
+  const phrases = ['INFOGRAFÍA', 'DATOS', 'AIDA+CLOSE', 'DISEÑO', 'IMPACTO'];
+  const t1 = document.getElementById('gooey1');
+  const t2 = document.getElementById('gooey2');
+  if (!t1 || !t2) return;
+  const morphTime = 1, cooldownTime = 0.4;
+  let idx = phrases.length - 1, time = new Date(), morph = 0, cooldown = cooldownTime;
+  t1.textContent = phrases[idx % phrases.length];
+  t2.textContent = phrases[(idx + 1) % phrases.length];
+  function setMorph(f) {
+    t2.style.filter = `blur(${Math.min(8 / f - 8, 100)}px)`;
+    t2.style.opacity = `${Math.pow(f, 0.4) * 100}%`;
+    const g = 1 - f;
+    t1.style.filter = `blur(${Math.min(8 / g - 8, 100)}px)`;
+    t1.style.opacity = `${Math.pow(g, 0.4) * 100}%`;
+  }
+  function loop() {
+    requestAnimationFrame(loop);
+    const now = new Date();
+    const inc = cooldown > 0;
+    const dt = (now - time) / 1000; time = now; cooldown -= dt;
+    if (cooldown <= 0) {
+      if (inc) {
+        idx = (idx + 1) % phrases.length;
+        t1.textContent = phrases[idx % phrases.length];
+        t2.textContent = phrases[(idx + 1) % phrases.length];
+      }
+      morph -= cooldown; cooldown = 0;
+      let f = morph / morphTime;
+      if (f > 1) { cooldown = cooldownTime; f = 1; }
+      setMorph(f);
+    } else {
+      morph = 0; t2.style.filter = ''; t2.style.opacity = '100%';
+      t1.style.filter = ''; t1.style.opacity = '0%';
+    }
+  }
+  loop();
+})();
+
+// ===== FOOTER: STATS (count-up + sparklines) =====
+function getFooterStats() {
+  const ids = ['projectName','projectTagline','projectUrl','problemStatement','solutionStatement','valueProp','targetUser','tam','sam','som','userPain','competitor','advantages','moat','demoUrl','features','roadmap','techStack','architecture','techAdvantage'];
+  const filled = ids.filter(id => document.getElementById(id)?.value?.trim()).length;
+  return {
+    progress: Math.round((filled / 19) * 100) > 100 ? 100 : Math.round((filled / 19) * 100),
+    fields: filled,
+    pitches: (typeof savedPitches !== 'undefined' ? savedPitches.length : 0),
+    practices: (typeof practiceHistory !== 'undefined' ? practiceHistory.length : 0)
+  };
+}
+function animateCount(el, to, suffix) {
+  const from = parseInt(el.textContent) || 0;
+  if (from === to) { el.textContent = to + (suffix || ''); return; }
+  const dur = 700, start = performance.now();
+  function step(t) {
+    const p = Math.min((t - start) / dur, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(from + (to - from) * eased) + (suffix || '');
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+const sparkHistory = { progress: [], fields: [], pitches: [], practices: [] };
+function drawSpark(key, value) {
+  const arr = sparkHistory[key];
+  arr.push(value);
+  if (arr.length > 20) arr.shift();
+  const poly = document.querySelector(`[data-spark="${key}"]`);
+  if (!poly) return;
+  const max = Math.max(...arr, 1);
+  const pts = arr.map((v, i) => {
+    const x = arr.length === 1 ? 0 : (i / (arr.length - 1)) * 100;
+    const y = 26 - (v / max) * 24;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  poly.setAttribute('points', pts);
+}
+function refreshFooterStats() {
+  const s = getFooterStats();
+  document.querySelectorAll('.stat-val').forEach(el => {
+    const k = el.dataset.stat;
+    animateCount(el, s[k], el.dataset.suffix || '');
+    drawSpark(k, s[k]);
+  });
+}
+document.addEventListener('input', e => {
+  if (e.target.closest('#section-build')) refreshFooterStats();
+});
+setInterval(refreshFooterStats, 4000);
+setTimeout(refreshFooterStats, 300);
+document.querySelectorAll('.section-card').forEach(c => c.classList.add('hud-corner'));
+
+// ===== VISUALIZE: WEBGL SHADER BACKGROUND (offline, no deps) =====
+(function vizShader() {
+  const canvas = document.getElementById('vizShader');
+  if (!canvas) return;
+  const gl = canvas.getContext('webgl');
+  if (!gl) { canvas.style.display = 'none'; return; } // graceful fallback
+
+  const vs = `attribute vec2 p; void main(){ gl_Position = vec4(p,0.0,1.0); }`;
+  const fs = `
+  precision highp float;
+  uniform vec2 iResolution;
+  uniform float iTime;
+  const float overallSpeed=0.18;
+  const float gridSmoothWidth=0.015;
+  const float scale=5.0;
+  const float minLineWidth=0.012, maxLineWidth=0.18;
+  const float lineSpeed=1.0*overallSpeed, lineAmplitude=1.0, lineFrequency=0.2;
+  const float warpSpeed=0.2*overallSpeed, warpFrequency=0.5, warpAmplitude=1.0;
+  const float offsetFrequency=0.5, offsetSpeed=1.33*overallSpeed;
+  const float minOffsetSpread=0.6, maxOffsetSpread=2.0;
+  const int linesPerGroup=14;
+  // brand colors
+  const vec4 lineColor=vec4(0.91,0.38,0.10,1.0);   // #E8621A
+  const vec4 bg1=vec4(0.075,0.105,0.176,1.0);      // #13203b
+  const vec4 bg2=vec4(0.106,0.165,0.290,1.0);      // #1B2A4A-ish
+  #define drawSmoothLine(pos,hw,t) smoothstep(hw,0.0,abs(pos-(t)))
+  #define drawCrispLine(pos,hw,t) smoothstep(hw+gridSmoothWidth,hw,abs(pos-(t)))
+  float random(float t){ return (cos(t)+cos(t*1.3+1.3)+cos(t*1.4+1.4))/3.0; }
+  float getPlasmaY(float x,float hf,float off){ return random(x*lineFrequency+iTime*lineSpeed)*hf*lineAmplitude+off; }
+  void main(){
+    vec2 fc=gl_FragCoord.xy;
+    vec2 uv=fc/iResolution.xy;
+    vec2 space=(fc-iResolution.xy/2.0)/iResolution.x*2.0*scale;
+    float hf=1.0-(cos(uv.x*6.28)*0.5+0.5);
+    float vf=1.0-(cos(uv.y*6.28)*0.5+0.5);
+    space.y+=random(space.x*warpFrequency+iTime*warpSpeed)*warpAmplitude*(0.5+hf);
+    space.x+=random(space.y*warpFrequency+iTime*warpSpeed+2.0)*warpAmplitude*hf;
+    vec4 lines=vec4(0.0);
+    for(int l=0;l<linesPerGroup;l++){
+      float ni=float(l)/float(linesPerGroup);
+      float ot=iTime*offsetSpeed;
+      float op=float(l)+space.x*offsetFrequency;
+      float rand=random(op+ot)*0.5+0.5;
+      float hw=mix(minLineWidth,maxLineWidth,rand*hf)/2.0;
+      float off=random(op+ot*(1.0+ni))*mix(minOffsetSpread,maxOffsetSpread,hf);
+      float lp=getPlasmaY(space.x,hf,off);
+      float line=drawSmoothLine(lp,hw,space.y)/2.0+drawCrispLine(lp,hw*0.15,space.y);
+      lines+=line*lineColor*rand;
+    }
+    vec4 col=mix(bg1,bg2,uv.x);
+    col*=vf; col.a=1.0; col+=lines;
+    gl_FragColor=col;
+  }`;
+
+  function mk(type, src){ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s);
+    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){ console.warn(gl.getShaderInfoLog(s)); return null; } return s; }
+  const v=mk(gl.VERTEX_SHADER,vs), f=mk(gl.FRAGMENT_SHADER,fs);
+  if(!v||!f){ canvas.style.display='none'; return; }
+  const prog=gl.createProgram(); gl.attachShader(prog,v); gl.attachShader(prog,f); gl.linkProgram(prog);
+  if(!gl.getProgramParameter(prog,gl.LINK_STATUS)){ canvas.style.display='none'; return; }
+  const buf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const loc=gl.getAttribLocation(prog,'p');
+  const uRes=gl.getUniformLocation(prog,'iResolution'), uTime=gl.getUniformLocation(prog,'iTime');
+
+  function resize(){ const r=canvas.getBoundingClientRect();
+    const dpr=Math.min(window.devicePixelRatio||1,1.5);
+    canvas.width=Math.max(1,r.width*dpr); canvas.height=Math.max(1,r.height*dpr);
+    gl.viewport(0,0,canvas.width,canvas.height); }
+  window.addEventListener('resize',resize); resize();
+
+  const t0=Date.now(); let raf;
+  const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  function frame(){
+    const t=(Date.now()-t0)/1000;
+    gl.useProgram(prog);
+    gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+    gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+    gl.uniform2f(uRes,canvas.width,canvas.height);
+    gl.uniform1f(uTime,reduce?6.0:t);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    if(!reduce) raf=requestAnimationFrame(frame);
+  }
+  // only animate while Visualize is visible (perf)
+  function tick(){
+    const vis=document.getElementById('section-visualize');
+    if(vis && vis.style.display!=='none'){ if(!raf){ resize(); frame(); } }
+    else { if(raf){ cancelAnimationFrame(raf); raf=null; } }
+  }
+  setInterval(tick,600); setTimeout(tick,400);
+})();
+
+// ===== SLIDE TEXT EFFECTS (presenter titles) =====
+function animateSlideTitle(idx) {
+  const slide = document.getElementById('pres-slide-' + idx);
+  if (!slide) return;
+  const h3 = slide.querySelector('h3');
+  if (!h3) return;
+
+  const txtSpan = h3.querySelector('.pres-text');
+  if (!txtSpan) return;
+
+  const txt = txtSpan.getAttribute('data-text') || txtSpan.textContent;
+  txtSpan.setAttribute('data-text', txt);
+
+  // Limpiar efectos previos
+  h3.querySelectorAll('.slice').forEach(s => s.remove());
+  const oldMag = h3.querySelector('.mag-circle');
+  if (oldMag) oldMag.remove();
+  if (h3._typeTimeout) clearTimeout(h3._typeTimeout);
+  h3.className = 'pres-slide-' + idx;
+
+  const chars = [...txt];
+  const delay = 28;
+
+  switch (idx) {
+    case 0: // GLOW: chars scale in with stagger
+      h3.classList.add('pres-glow');
+      txtSpan.innerHTML = chars.map((ch, i) =>
+        `<span class="char" style="animation-delay:${i * delay}ms">${ch === ' ' ? '\u00A0' : ch}</span>`
+      ).join('');
+      break;
+
+    case 1: // ROLL: two layers, top rolls up, bottom rolls in
+      h3.classList.add('pres-roll');
+      txtSpan.innerHTML =
+        `<div class="roll-layer roll-top">` + chars.map((ch, i) =>
+          `<span class="char" style="animation-delay:${i * delay}ms">${ch === ' ' ? '\u00A0' : ch}</span>`
+        ).join('') + `</div>` +
+        `<div class="roll-layer roll-bot">` + chars.map((ch, i) =>
+          `<span class="char" style="animation-delay:${i * delay}ms">${ch === ' ' ? '\u00A0' : ch}</span>`
+        ).join('') + `</div>`;
+      break;
+
+    case 2: // SHUTTER: 3 clip-path slices slide in from opposite sides
+      h3.classList.add('pres-shutter');
+      txtSpan.innerHTML = chars.map((ch, i) =>
+        `<span class="char">${ch === ' ' ? '\u00A0' : ch}</span>`
+      ).join('');
+      ['slice-top', 'slice-mid', 'slice-bot'].forEach((cls, layerIdx) => {
+        const div = document.createElement('div');
+        div.className = 'slice ' + cls;
+        div.innerHTML = chars.map((ch, i) =>
+          `<span class="char" style="animation-delay:${i * delay + layerIdx * 60}ms">${ch === ' ' ? '\u00A0' : ch}</span>`
+        ).join('');
+        h3.appendChild(div);
+      });
+      break;
+
+    case 3: // MAGNETIC: expanding circle reveals inverted text
+      h3.classList.add('pres-magnetic');
+      txtSpan.innerHTML = chars.map((ch, i) =>
+        `<span class="char">${ch === ' ' ? '\u00A0' : ch}</span>`
+      ).join('');
+      const circle = document.createElement('div');
+      circle.className = 'mag-circle';
+      circle.innerHTML = `<div class="mag-inner">${txt}</div>`;
+      h3.appendChild(circle);
+      requestAnimationFrame(() => requestAnimationFrame(() => h3.classList.add('mag-active')));
+      break;
+
+    case 4: // TECH: terminal typing with blinking cursor and corner brackets
+      h3.classList.add('pres-tech');
+      txtSpan.innerHTML = '';
+      let i4 = 0;
+      const type = () => {
+        if (i4 < chars.length) {
+          txtSpan.innerHTML += (chars[i4] === ' ' ? '\u00A0' : chars[i4]);
+          i4++;
+          h3._typeTimeout = setTimeout(type, 60);
+        } else {
+          const cursor = document.createElement('span');
+          cursor.className = 'cursor';
+          txtSpan.appendChild(cursor);
+        }
+      };
+      type();
+      break;
+
+    case 5: // GLASS: words spring in with blue gradient glow
+      h3.classList.add('pres-glass');
+      const words = txt.split(' ');
+      txtSpan.innerHTML = words.map((word, wi) =>
+        `<span class="word" style="animation-delay:${wi * 120 + 300}ms">${word}</span>`
+      ).join(' ');
+      break;
+  }
+}
+
+function revealActiveSlideTitle() {
+  const activeSlide = document.querySelector('#presentationOverlay .preview-slide.active');
+  if (!activeSlide) return;
+  const idx = parseInt(activeSlide.id.replace('pres-slide-', ''), 10);
+  animateSlideTitle(idx);
+}
+
+// ===== RADAR STATS (presenter readiness) =====
+function renderRadarStats() {
+  const bars = document.getElementById('phaseBars');
+  const ring = document.getElementById('radarRing');
+  if (!bars || !ring) return;
+  const phases = [
+    { k:'hook', label:'Hook', color:'var(--hook-color)' },
+    { k:'interest', label:'Interés', color:'var(--interest-color)' },
+    { k:'desire', label:'Deseo', color:'var(--desire-color)' },
+    { k:'action', label:'Acción', color:'var(--action-color)' },
+    { k:'close', label:'Cierre', color:'var(--close-color)' },
+  ];
+  const fieldMap = {
+    hook:['projectName','projectTagline'],
+    interest:['problemStatement','userPain','targetUser'],
+    desire:['solutionStatement','valueProp','advantages','moat'],
+    action:['demoUrl','features','roadmap'],
+    close:['competitor','techStack','techAdvantage']
+  };
+  bars.innerHTML = '';
+  let totalPct = 0;
+  phases.forEach((p, idx) => {
+    const fields = fieldMap[p.k];
+    const filled = fields.filter(id => document.getElementById(id)?.value?.trim()).length;
+    const pct = Math.round((filled / fields.length) * 100);
+    totalPct += pct;
+    const row = document.createElement('div');
+    row.className = 'phase-bar';
+    row.innerHTML = `<div class="pb-label"><span>${p.label}</span><span>${pct}%</span></div><div class="pb-track"><div class="pb-fill" style="background:${p.color}"></div></div>`;
+    bars.appendChild(row);
+    requestAnimationFrame(() => { row.querySelector('.pb-fill').style.width = pct + '%'; });
+    const angle = (idx / phases.length) * Math.PI * 2 - Math.PI/2;
+    const r = 20 + (pct/100) * 80;
+    const blip = document.createElement('div');
+    blip.className = 'blip';
+    blip.style.background = p.color; blip.style.boxShadow = `0 0 10px ${p.color}`;
+    blip.style.left = (100 + Math.cos(angle)*r) + 'px';
+    blip.style.top = (100 + Math.sin(angle)*r) + 'px';
+    ring.appendChild(blip);
+  });
+  const ready = Math.round(totalPct / phases.length);
+  const rv = document.getElementById('radarReady');
+  if (rv) { let cur=0; const step=()=>{ cur+=Math.ceil((ready-cur)/6)||1; if(cur>=ready)cur=ready; rv.textContent=cur+'%'; if(cur<ready)requestAnimationFrame(step); }; step(); }
+}
+function refreshRadar() {
+  document.querySelectorAll('#radarRing .blip').forEach(b => b.remove());
+  renderRadarStats();
+}
+document.addEventListener('input', e => { if (e.target.closest('#section-build')) refreshRadar(); });
+setTimeout(refreshRadar, 500);
+
+function exportEmbed() {
+  const embed = `<iframe src="${document.getElementById('shareUrlText').textContent}" width="100%" height="600" frameborder="0"></iframe>`;
+  navigator.clipboard.writeText(embed).then(() => showToast('Codigo embed copiado'));
+}
+
+function createABTest() {
+  showToast('Test A/B creado. Distribuyendo versiones...');
+}
+
+function viewABResults() {
+  showToast('Resultados A/B: Version A 65% | Version B 35%');
+}
+
+// ===== TOAST =====
+function showToast(message) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast-custom';
+  toast.innerHTML = `<svg class="ic" style="color:var(--accent);margin-right:0.5rem" aria-hidden="true"><use href="#i-check-circle"></use></svg> ${message}`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// ===== PWA INSTALL =====
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installPwaBtn').classList.add('show');
+});
+
+function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choice => {
+      if (choice.outcome === 'accepted') {
+        showToast('App instalada!');
+      }
+      deferredPrompt = null;
+      document.getElementById('installPwaBtn').classList.remove('show');
+    });
+  }
+}
+
+// ===== OFFLINE DETECTION =====
+window.addEventListener('online', () => {
+  document.getElementById('offlineBadge').classList.remove('show');
+  showToast('Conexion restaurada');
+});
+window.addEventListener('offline', () => {
+  document.getElementById('offlineBadge').classList.add('show');
+  showToast('Modo offline activado');
+});
+if (!navigator.onLine) document.getElementById('offlineBadge').classList.add('show');
+
+// ===== SERVICE WORKER =====
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('data:text/javascript;base64,' + btoa(`
+    self.addEventListener('install', e => {
+      e.waitUntil(self.skipWaiting());
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(self.clients.claim());
+    });
+    self.addEventListener('fetch', e => {
+      e.respondWith(fetch(e.request).catch(() => {
+        return new Response('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Offline</title><style>body{font-family:sans-serif;background:#13203b;color:#F5F0E8;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;text-align:center}</style></head><body><div><h1>Modo Offline</h1><p>PitchCraft esta disponible sin conexion.</p><button onclick="location.reload()">Recargar</button></div></body></html>', { headers: { 'Content-Type': 'text/html' } });
+      }));
+    });
+  `)).catch(() => {});
+}
+
+// ===== KEYBOARD NAVIGATION =====
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const pm = document.getElementById('promptModal');
+    if (pm && pm.classList.contains('active')) { pm.classList.remove('active'); return; }
+  }
+  if (document.getElementById('presentationOverlay').classList.contains('active')) {
+    if (e.key === 'ArrowRight' || e.key === ' ') nextPresSlide();
+    if (e.key === 'ArrowLeft') prevPresSlide();
+    if (e.key === 'Escape') exitPresentationMode();
+  }
+});
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  renderSavedPitches();
+  renderPracticeHistory();
+  updateProgress();
+
+  // Init heatmap cells
+  const heatmap = document.getElementById('practiceHeatmap');
+  if (heatmap) {
+    for (let i = 0; i < 25; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'heatmap-cell';
+      heatmap.appendChild(cell);
+    }
+  }
+
+  // Init audio visualizer bars
+  const visualizer = document.getElementById('audioVisualizer');
+  if (visualizer) {
+    for (let i = 0; i < 30; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'audio-bar';
+      bar.style.height = '5px';
+      visualizer.appendChild(bar);
+    }
+  }
+});
+</script>
+
+<div class="prompt-modal-overlay" id="promptModal" role="dialog" aria-modal="true" aria-labelledby="promptModalTitle">
+<div class="prompt-modal">
+<div class="d-flex justify-content-between align-items-start mb-3">
+<h3 id="promptModalTitle" style="font-family:'Syne',sans-serif;margin:0"><svg class="ic" style="color:var(--primary)" aria-hidden="true"><use href="#i-stars"></use></svg> Generador de prompt</h3>
+<button class="btn-close-modal" onclick="closePromptModal()" aria-label="Cerrar"><svg class="ic" aria-hidden="true"><use href="#i-x-lg"></use></svg></button>
+</div>
+<p style="color:var(--text-muted);font-size:0.9rem">Describe el <strong>contexto</strong> que identificaste para tu proyecto. El sistema combinará tus datos del Build con la metodología (AIDA+Close, audiencia y ponderaciones) y generará un prompt listo para optimizar tu pitch e infografía con una IA generativa.</p>
+<div class="mb-3"><label class="form-label-custom">Contexto identificado por el estudiante</label><textarea class="form-control-custom" id="promptContext" rows="3" placeholder="Ej: presentaré ante un comité académico que evalúa viabilidad; mi audiencia desconoce el problema técnico y prioriza el impacto social..."></textarea></div>
+<div class="row g-3 mb-3">
+<div class="col-md-6"><label class="form-label-custom">Objetivo de la optimización</label><select class="form-control-custom" id="promptGoal"><option value="claridad y jerarquía visual">Claridad y jerarquía visual</option><option value="impacto persuasivo">Impacto persuasivo</option><option value="síntesis y reducción de carga cognitiva">Síntesis (menos carga cognitiva)</option><option value="adecuación a la audiencia">Adecuación a la audiencia</option></select></div>
+<div class="col-md-6"><label class="form-label-custom">Tono</label><select class="form-control-custom" id="promptTone"><option value="profesional y conciso">Profesional y conciso</option><option value="cercano y didáctico">Cercano y didáctico</option><option value="técnico y riguroso">Técnico y riguroso</option><option value="inspirador">Inspirador</option></select></div>
+</div>
+<button class="btn btn-primary-custom w-100 mb-3" onclick="buildPrompt()"><svg class="ic" aria-hidden="true"><use href="#i-magic"></use></svg> Generar prompt</button>
+<div id="promptOutputWrap" style="display:none">
+<label class="form-label-custom">Prompt generado</label>
+<textarea class="form-control-custom" id="promptOutput" rows="12" readonly style="font-family:'DM Mono',monospace;font-size:0.8rem"></textarea>
+<button class="btn btn-outline-custom w-100 mt-2" onclick="copyPrompt()"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"></use></svg> Copiar prompt</button>
+</div>
+</div>
+</div>
+
+</body>
+</html>
