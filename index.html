@@ -502,6 +502,7 @@ select.form-control-custom{appearance:none;background-image:url("data:image/svg+
 <button class="btn btn-primary-custom" onclick="loadDemo()"><svg class="ic" aria-hidden="true"><use href="#i-lightning-charge-fill"></use></svg> Insertar demo guiado</button>
 <button class="btn btn-outline-custom" onclick="clearBuild()"><svg class="ic" aria-hidden="true"><use href="#i-eraser"></use></svg> Limpiar campos</button>
 <button class="btn btn-outline-custom" onclick="openPromptModal()"><svg class="ic" aria-hidden="true"><use href="#i-stars"></use></svg> Generar prompt de optimización</button>
+<button class="btn btn-outline-custom" onclick="openVideoPromptModal()"><svg class="ic" aria-hidden="true"><use href="#i-play-circle"></use></svg> Generar prompt de video</button>
 </div>
 <p style="color:var(--text-muted);font-size:0.8rem;margin-top:0.75rem"><svg class="ic" aria-hidden="true"><use href="#i-info-circle"></use></svg> <strong>¿Qué hace el demo?</strong> Rellena cada campo con un ejemplo modelo para que veas el <em>tipo</em> y la <em>extensión</em> de información esperada. Reemplázalo con tu propio proyecto.</p>
 </div>
@@ -1786,6 +1787,87 @@ function copyPrompt() {
   });
 }
 
+// ===== GENERADOR DE PROMPT DE VIDEO =====
+function openVideoPromptModal() { document.getElementById('videoPromptModal').classList.add('active'); }
+function closeVideoPromptModal() { document.getElementById('videoPromptModal').classList.remove('active'); }
+function buildVideoPrompt() {
+  const g = id => (document.getElementById(id)?.value || '').trim();
+  const student = `${g('studentFirstName')} ${g('studentLastName')}`.trim() || 'Estudiante';
+  const audienceMap = { investor: 'inversores', client: 'clientes', partner: 'socios estratégicos', other: 'audiencia personalizada' };
+  const audience = audienceMap[typeof currentAudience !== 'undefined' ? currentAudience : 'investor'] || 'la audiencia';
+  const context = g('videoContext') || '(no especificado)';
+  const duration = g('videoDuration');
+  const aspect = g('videoAspect');
+  const platform = g('videoPlatform');
+  const style = g('videoStyle');
+  const voice = g('videoVoice');
+  const tone = g('videoTone');
+  const weights = ['hook','interest','desire','action','close']
+    .map(k => `${k}: ${document.getElementById('weight-'+k)?.value || '?'}%`).join(', ');
+
+  const prompt = `# Rol
+Actúa como director creativo y guionista de video especializado en piezas de pitch breves y de alto impacto para IA generativa de video.
+
+# Tarea
+Genera el guion técnico y el prompt de producción de un VIDEO PITCH de ${duration}, estructurado en las cinco fases AIDA+Close (Hook → Interés → Deseo → Acción → Cierre). El resultado debe poder copiarse en una herramienta de generación de video por IA (p. ej. Sora, Runway, Veo, Higgsfield) o usarse como brief de edición.
+
+# Autoría
+Estudiante: ${student}
+
+# Contexto identificado
+${context}
+
+# Audiencia objetivo
+${audience}
+
+# Datos del proyecto
+- Nombre: ${g('projectName') || '(vacío)'}
+- Tagline: ${g('projectTagline') || '(vacío)'}
+- Problema: ${g('problemStatement') || '(vacío)'}
+- Solución: ${g('solutionStatement') || '(vacío)'}
+- Propuesta de valor: ${g('valueProp') || '(vacío)'}
+- Usuario objetivo: ${g('targetUser') || '(vacío)'}
+- Diferenciadores: ${g('advantages') || '(vacío)'}
+- Demo / funcionalidad clave: ${g('demoUrl') || '(vacío)'}
+
+# Especificaciones técnicas del video
+- Duración total: ${duration}
+- Relación de aspecto: ${aspect}
+- Plataforma destino: ${platform}
+- Estilo visual: ${style}
+- Narración / voz: ${voice}
+- Tono: ${tone}
+
+# Ponderación por fase (reparte la duración total proporcionalmente)
+${weights}
+
+# Marco metodológico a respetar
+- AIDA+Close (Lewis, 1898; Strong, 1925) para la secuencia persuasiva: el Hook captura en los primeros 3 segundos.
+- Narrativa de presentación (Duarte, 2010): el cierre retoma la idea-fuerza con una llamada a la acción clara.
+- Diseño de información y carga cognitiva (Tufte, 1990; Mayer, 2009): un mensaje por escena, texto en pantalla legible y mínimo.
+
+# Entregable esperado
+1. Storyboard por fase (5 bloques). Para CADA fase entrega:
+   - Duración en segundos (calculada desde las ponderaciones y la duración total).
+   - Descripción visual de la escena/plano (encuadre, movimiento de cámara, ambientación, paleta acorde al estilo).
+   - Texto en pantalla / lower-thirds (breve y legible en ${aspect}).
+   - Locución (voz en off) palabra por palabra, ajustada al tiempo de la fase.
+   - Música y diseño sonoro (mood, transición, acentos).
+2. Un PROMPT DE VIDEO condensado por escena, listo para pegar en una herramienta de IA de video (incluye estilo, aspecto ${aspect} y acción de cámara en cada uno).
+3. Sugerencia de gancho visual alternativo para los primeros 3 segundos (A/B).
+
+Optimiza el ritmo para "${platform}" y mantén la coherencia visual de marca en todas las escenas.`;
+
+  document.getElementById('videoPromptOutput').value = prompt;
+  document.getElementById('videoPromptOutputWrap').style.display = 'block';
+}
+function copyVideoPrompt() {
+  const t = document.getElementById('videoPromptOutput');
+  navigator.clipboard.writeText(t.value).then(() => showToast('Prompt de video copiado al portapapeles')).catch(() => {
+    t.select(); document.execCommand('copy'); showToast('Prompt de video copiado');
+  });
+}
+
 // ===== FOOTER: GOOEY TEXT (vanilla port) =====
 (function gooey() {
   const phrases = ['INFOGRAFÍA', 'DATOS', 'AIDA+CLOSE', 'DISEÑO', 'IMPACTO'];
@@ -2256,6 +2338,31 @@ document.addEventListener('DOMContentLoaded', () => {
 <label class="form-label-custom">Prompt generado</label>
 <textarea class="form-control-custom" id="promptOutput" rows="12" readonly style="font-family:'DM Mono',monospace;font-size:0.8rem"></textarea>
 <button class="btn btn-outline-custom w-100 mt-2" onclick="copyPrompt()"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"></use></svg> Copiar prompt</button>
+</div>
+</div>
+</div>
+
+<div class="prompt-modal-overlay" id="videoPromptModal" role="dialog" aria-modal="true" aria-labelledby="videoPromptModalTitle">
+<div class="prompt-modal">
+<div class="d-flex justify-content-between align-items-start mb-3">
+<h3 id="videoPromptModalTitle" style="font-family:'Syne',sans-serif;margin:0"><svg class="ic" style="color:var(--primary)" aria-hidden="true"><use href="#i-play-circle"></use></svg> Generador de prompt de video</h3>
+<button class="btn-close-modal" onclick="closeVideoPromptModal()" aria-label="Cerrar"><svg class="ic" aria-hidden="true"><use href="#i-x-lg"></use></svg></button>
+</div>
+<p style="color:var(--text-muted);font-size:0.9rem">Misma estructura AIDA+Close, pero el prompt resultante está pensado para <strong>producir un video pitch</strong>. Combina tus datos del Build con las ponderaciones y la audiencia para entregar un guion técnico y un prompt listo para una IA de generación de video.</p>
+<div class="mb-3"><label class="form-label-custom">Contexto identificado por el estudiante</label><textarea class="form-control-custom" id="videoContext" rows="3" placeholder="Ej: el video se proyectará al inicio de mi exposición; la audiencia no conoce el producto y decide en menos de un minuto..."></textarea></div>
+<div class="row g-3 mb-3">
+<div class="col-md-6"><label class="form-label-custom">Duración del video</label><select class="form-control-custom" id="videoDuration"><option value="30 segundos">30 segundos</option><option value="60 segundos">60 segundos</option><option value="90 segundos">90 segundos</option><option value="3 minutos">3 minutos</option></select></div>
+<div class="col-md-6"><label class="form-label-custom">Relación de aspecto</label><select class="form-control-custom" id="videoAspect"><option value="16:9 (horizontal)">16:9 (horizontal)</option><option value="9:16 (vertical)">9:16 (vertical)</option><option value="1:1 (cuadrado)">1:1 (cuadrado)</option></select></div>
+<div class="col-md-6"><label class="form-label-custom">Plataforma destino</label><select class="form-control-custom" id="videoPlatform"><option value="presentación / proyección en aula">Presentación / aula</option><option value="YouTube">YouTube</option><option value="Instagram / TikTok (Reels)">Instagram / TikTok</option><option value="LinkedIn">LinkedIn</option></select></div>
+<div class="col-md-6"><label class="form-label-custom">Estilo visual</label><select class="form-control-custom" id="videoStyle"><option value="motion graphics / infografía animada">Motion graphics / infografía</option><option value="cinematográfico con tomas reales">Cinematográfico (real)</option><option value="screencast del producto">Screencast del producto</option><option value="minimalista tipográfico">Minimalista tipográfico</option></select></div>
+<div class="col-md-6"><label class="form-label-custom">Narración / voz</label><select class="form-control-custom" id="videoVoice"><option value="voz en off profesional">Voz en off profesional</option><option value="sin narración, solo texto y música">Sin narración (texto+música)</option><option value="presentador a cámara">Presentador a cámara</option></select></div>
+<div class="col-md-6"><label class="form-label-custom">Tono</label><select class="form-control-custom" id="videoTone"><option value="profesional y conciso">Profesional y conciso</option><option value="dinámico y enérgico">Dinámico y enérgico</option><option value="inspirador">Inspirador</option><option value="cercano y didáctico">Cercano y didáctico</option></select></div>
+</div>
+<button class="btn btn-primary-custom w-100 mb-3" onclick="buildVideoPrompt()"><svg class="ic" aria-hidden="true"><use href="#i-magic"></use></svg> Generar prompt de video</button>
+<div id="videoPromptOutputWrap" style="display:none">
+<label class="form-label-custom">Prompt de video generado</label>
+<textarea class="form-control-custom" id="videoPromptOutput" rows="12" readonly style="font-family:'DM Mono',monospace;font-size:0.8rem"></textarea>
+<button class="btn btn-outline-custom w-100 mt-2" onclick="copyVideoPrompt()"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"></use></svg> Copiar prompt de video</button>
 </div>
 </div>
 </div>

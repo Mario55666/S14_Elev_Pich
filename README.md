@@ -16,6 +16,7 @@ Aplicación web de una sola página (PWA) para **construir, visualizar, practica
 4. Completa los campos del proyecto; el panel de vista previa se actualiza en vivo.
 5. Pasa a **Visualizar** para ver la infografía por fases, y a **Practicar** para ensayar con cronómetro.
 6. Usa **Generar prompt de optimización** para obtener un prompt listo para refinar tu infografía con una IA.
+7. Usa **Generar prompt de video** para obtener un prompt con la misma estructura AIDA+Close, pero orientado a **producir un video pitch** (guion técnico por fase + prompt listo para una IA de generación de video).
 
 ---
 
@@ -61,7 +62,7 @@ Para borrar los datos, limpia el almacenamiento del navegador para este archivo.
 
 - **PWA / Service Worker:** el registro del service worker solo se intenta bajo `http(s)`. Desde `file://` no se registra (es esperado) y la app sigue funcionando; la instalación PWA y el cacheo offline automático requieren servir el archivo por HTTPS.
 - **Identidad visual:** sistema d3magindesign — navy `#1B2A4A`, naranja `#E8621A`, crema `#F5F0E8`; tipografías Syne + DM Sans + DM Mono. Capa visual mecatrónica (grid HUD, robot SVG animado, íconos line-style).
-- **Generador de prompt:** construye el texto del prompt combinando los datos del proyecto, la audiencia y las ponderaciones; **no** llama a ninguna IA por sí mismo (se copia y se pega donde se desee).
+- **Generador de prompt:** construye el texto del prompt combinando los datos del proyecto, la audiencia y las ponderaciones; **no** llama a ninguna IA por sí mismo (se copia y se pega donde se desee). Existen dos variantes: *optimización de infografía* y *video pitch*. La variante de video añade parámetros de producción (duración, relación de aspecto, plataforma, estilo visual, narración y tono) y entrega un storyboard por fase más un prompt condensado por escena para herramientas de IA de video.
 
 ---
 
