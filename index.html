@@ -1867,6 +1867,15 @@ function copyVideoPrompt() {
     t.select(); document.execCommand('copy'); showToast('Prompt de video copiado');
   });
 }
+function loadSuperprompt() {
+  const src = document.getElementById('superpromptVideoSrc');
+  const out = document.getElementById('videoPromptOutput');
+  if (!src || !out) return;
+  out.value = src.value.trim();
+  document.getElementById('videoPromptOutputWrap').style.display = 'block';
+  out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  showToast('Superprompt de videoinfografía insertado. Pégalo junto con tu documento/brief.');
+}
 
 // ===== FOOTER: GOOEY TEXT (vanilla port) =====
 (function gooey() {
@@ -2359,11 +2368,104 @@ document.addEventListener('DOMContentLoaded', () => {
 <div class="col-md-6"><label class="form-label-custom">Tono</label><select class="form-control-custom" id="videoTone"><option value="profesional y conciso">Profesional y conciso</option><option value="dinámico y enérgico">Dinámico y enérgico</option><option value="inspirador">Inspirador</option><option value="cercano y didáctico">Cercano y didáctico</option></select></div>
 </div>
 <button class="btn btn-primary-custom w-100 mb-3" onclick="buildVideoPrompt()"><svg class="ic" aria-hidden="true"><use href="#i-magic"></use></svg> Generar prompt de video</button>
+<button class="btn btn-outline-custom w-100 mb-3" onclick="loadSuperprompt()"><svg class="ic" aria-hidden="true"><use href="#i-code"></use></svg> Insertar superprompt de videoinfografía (HTML)</button>
 <div id="videoPromptOutputWrap" style="display:none">
 <label class="form-label-custom">Prompt de video generado</label>
 <textarea class="form-control-custom" id="videoPromptOutput" rows="12" readonly style="font-family:'DM Mono',monospace;font-size:0.8rem"></textarea>
 <button class="btn btn-outline-custom w-100 mt-2" onclick="copyVideoPrompt()"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"></use></svg> Copiar prompt de video</button>
 </div>
+<textarea id="superpromptVideoSrc" hidden aria-hidden="true"># SUPERPROMPT — Reconstrucción de videoinfografía HTML animada desde documento
+
+> Pega este bloque completo en una conversación nueva **junto con el PDF/brief**.
+> El modelo debe leer el documento, extraer las condiciones y generar el HTML.
+
+---
+
+## ROL
+Eres ingeniero front-end + director de arte de motion graphics. Produces piezas
+web autónomas de alta densidad visual, sin frameworks, validadas antes de entregar.
+
+## ENTRADA
+Te adjunto un documento (PDF/brief) que describe una videoinfografía o recurso
+visual con bloques, tiempos, paleta, voz en off y reglas de producción.
+
+## FASE 1 — LOCALIZAR (obligatoria antes de codificar)
+Lee el documento y extrae a una tabla los siguientes parámetros. Si alguno NO
+está en el documento, márcalo como `[FALTA → asumo: X]` y declara el supuesto.
+No inventes datos silenciosamente.
+
+| Parámetro | Valor extraído del documento |
+|---|---|
+| Tema / título | |
+| Duración total (seg) | |
+| Nº de bloques/escenas y su rango temporal (in–out) | |
+| Acción visual por bloque | |
+| Voz en off por bloque (texto literal) | |
+| Paleta (máx. 3 colores; HEX) | |
+| Tipografía / pesos | |
+| Ritmo (cambio de plano cada N seg) | |
+| Música/BPM (si aplica) | |
+| CTA / cierre | |
+
+Si el documento pide tecnologías incompatibles con un archivo único
+(React, framer-motion, Spline, Vue, backend Java/PHP, jQuery innecesario):
+**no las uses**. Decláralo explícitamente y pórtalas a su equivalente nativo
+(SVG + anime.js + CSS). Señala el porqué en una línea.
+
+## FASE 2 — APLICAR (reglas de construcción NO negociables)
+
+**Arquitectura**
+- UN solo archivo `.html`. Todo inline: CSS en `<style>`, JS en `<script>`,
+  librerías embebidas (no CDN), imágenes en base64 si las hay.
+- Librería de animación: **anime.js v3.2.2 inlineada** (obtener vía
+  `npm pack animejs@3.2.2`, extraer `lib/anime.min.js`, pegar en un `<script>`).
+- Sin localStorage/sessionStorage.
+
+**Estructura de la pieza** (dos vistas en tabs):
+1. `Reproductor`: timeline maestro de la duración indicada, con
+   `requestAnimationFrame` + acumulador de `dt`; escenas que se activan por
+   rango temporal; barra de progreso; controles play/pausa/reiniciar.
+2. `Landing`: las mismas escenas como secciones scrolleables, con reveal
+   escalonado (`anime.stagger`) al entrar en viewport (`IntersectionObserver`).
+
+**Animación (anime.js)**
+- Cada escena tiene su `sceneIntro(id)` con timeline propio.
+- Usa `anime.stagger()` para entradas de elementos múltiples (dígitos, barras, pines, letras).
+- Texto cinético: animar letra por letra (`stagger(~28ms)`).
+- **Movimiento latente**: cada escena lleva una capa SVG de fondo (`.flowbg`)
+  con trazos animados en loop perpetuo vía `strokeDashoffset` (duraciones
+  desfasadas 18–28s, `easing:'linear'`). Opacidad baja (0.10–0.28), nunca debe
+  competir con los datos.
+- Trazo "manuscrito" para subrayar cifras clave: SVG `path` revelado con
+  `strokeDashoffset:[len,0]`, `easing:'cubicBezier(.43,.13,.23,.96)'`, ~2.2s.
+
+**Paleta**: exactamente 3 colores como CSS custom properties en `:root`.
+No introducir un 4.º color (los grises/tinta de fondo no cuentan como acento).
+
+**Hover**: cards con elevación + glow; botón CTA con efecto shine
+(pseudo-elemento que cruza en hover); tabs con realce.
+
+**Accesibilidad**: bloque `@media (prefers-reduced-motion:reduce)` que anula
+animaciones/transiciones y deja la pieza legible y estática; el reproductor
+arranca en pausa en ese caso.
+
+## FASE 3 — VALIDAR (antes de entregar)
+- Extraer el `<script>` propio y correr `node --check`. Debe pasar sin errores.
+- Verificar: 3 colores, anime.js presente una sola vez, suma de tiempos =
+  duración total declarada, una capa `.flowbg` por escena.
+- Reportar tamaño final del archivo.
+
+## SALIDA
+1. La tabla de la Fase 1 (parámetros + supuestos declarados).
+2. El archivo `.html` único.
+3. Lista de lo descartado por incompatibilidad (si aplica) y de lo que falta
+   del brief (típicamente: audio/VO, assets de personaje).
+
+## ESTILO DE TRABAJO
+Crítico y directo. Si el documento pide algo técnicamente irrealizable o
+contraproducente para el objetivo (claridad de datos), dilo y propón
+alternativa. No rellenes. Si no tienes certeza sobre un parámetro, decláralo.
+</textarea>
 </div>
 </div>
 
