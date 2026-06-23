@@ -1268,6 +1268,7 @@ function loadPitch(id) {
   selectAudience(pitch.audience);
   selectTheme(pitch.theme);
   updateProgress();
+  if (typeof saveBuildState === 'function') saveBuildState();
   showToast('Pitch cargado: ' + pitch.name);
   showSection('build');
 }
@@ -1713,6 +1714,7 @@ function loadDemo() {
   if (typeof updateProgress === 'function') updateProgress();
   if (typeof updatePreview === 'function') updatePreview();
   document.querySelectorAll('[oninput*="updateCharCount"]').forEach(el => el.dispatchEvent(new Event('input')));
+  if (typeof saveBuildState === 'function') saveBuildState();
   showToast('Demo guiado insertado. Revisa cada campo y reemplázalo con tu proyecto.');
 }
 function clearBuild() {
@@ -1723,6 +1725,7 @@ function clearBuild() {
   if (typeof updateProgress === 'function') updateProgress();
   if (typeof updatePreview === 'function') updatePreview();
   document.querySelectorAll('[oninput*="updateCharCount"]').forEach(el => el.dispatchEvent(new Event('input')));
+  if (typeof saveBuildState === 'function') saveBuildState();
   showToast('Campos del proyecto limpiados.');
 }
 
@@ -1852,6 +1855,14 @@ function buildPrompt() {
   const tone = g('promptTone');
   const weights = ['hook','interest','desire','action','close']
     .map(k => `${k}: ${document.getElementById('weight-'+k)?.value || '?'}%`).join(', ');
+  const fmt = g('promptOutputFormat') || 'html';
+  const FORMATS = {
+    html: { name: 'Infografía web HTML (una sola página)', how: 'Entrega un archivo .html autónomo (HTML + CSS, y JS solo si es imprescindible), responsive, con las 5 fases como secciones scrolleables y jerarquía visual clara. Sin dependencias externas obligatorias.', tools: 'Se visualiza abriendo el .html en cualquier navegador. Puedes generarlo/refinarlo con Claude, ChatGPT o v0.dev, y publicarlo en GitHub Pages, Netlify o CodePen.' },
+    powerpoint: { name: 'Presentación PowerPoint / Google Slides', how: 'Entrega un guion diapositiva por diapositiva (1 fase ≈ 1–2 slides): título, bullets máximos de 6 palabras, nota del orador y descripción del visual/gráfico de cada slide. Indica la estructura para reproducirla en PptxGenJS si se desea automatizar.', tools: 'Se arma en PowerPoint, Google Slides o Gamma/Tome (IA). El guion se pega slide por slide; el resultado se aprecia en modo presentación.' },
+    canva: { name: 'Diseño en Canva', how: 'Entrega instrucciones para Canva: tipo de plantilla (Infografía/Presentación), paleta y tipografías, y el contenido exacto de cada bloque/fase con su elemento visual sugerido (ícono, gráfico, foto).', tools: 'Se construye en Canva (manual o con “Magic Design”/“Magic Write”). El resultado se aprecia en el editor y se exporta a PDF/PNG/MP4.' },
+    image: { name: 'Infografía estática (imagen para imprimir)', how: 'Entrega un layout de un solo lienzo vertical (p. ej. A3/A4) con las 5 fases apiladas, jerarquía tipográfica, paleta e íconos; incluye un prompt de imagen listo para una IA generativa.', tools: 'Se genera con una IA de imagen (Ideogram, DALL·E, Midjourney) o se diseña en Figma/Illustrator; el resultado se aprecia como PNG/PDF imprimible.' }
+  };
+  const F = FORMATS[fmt] || FORMATS.html;
 
   const prompt = `# Rol
 Actúa como diseñador de información y experto en comunicación persuasiva.
@@ -1875,8 +1886,16 @@ ${audience}
 - Solución: ${g('solutionStatement') || '(vacío)'}
 - Propuesta de valor: ${g('valueProp') || '(vacío)'}
 - Usuario objetivo: ${g('targetUser') || '(vacío)'}
+- Dolor del usuario: ${g('userPain') || '(vacío)'}
+- Mercado (TAM/SAM/SOM): ${g('tam') || '(vacío)'} / ${g('sam') || '(vacío)'} / ${g('som') || '(vacío)'}
+- Competidor: ${g('competitor') || '(vacío)'}
 - Diferenciadores: ${g('advantages') || '(vacío)'}
+- Barrera de entrada (moat): ${g('moat') || '(vacío)'}
 - Demo / funcionalidad clave: ${g('demoUrl') || '(vacío)'}
+- Funcionalidades: ${g('features') || '(vacío)'}
+- Roadmap: ${g('roadmap') || '(vacío)'}
+- Stack tecnológico: ${g('techStack') || '(vacío)'}
+- Ventaja técnica: ${g('techAdvantage') || '(vacío)'}
 
 # Ponderación por fase (peso narrativo y visual)
 ${weights}
@@ -1887,6 +1906,11 @@ ${goal}
 # Tono
 ${tone}
 
+# Formato de salida — dónde se aplicará el resultado
+Destino: ${F.name}.
+${F.how}
+Dónde se aprecia el resultado: ${F.tools}
+
 # Marco metodológico a respetar
 - AIDA+Close (Lewis, 1898; Strong, 1925) para la secuencia persuasiva.
 - Diseño de información y reducción de carga cognitiva (Tufte, 1990; Mayer, 2009): jerarquía visual, un mensaje por bloque, datos accionables.
@@ -1894,8 +1918,9 @@ ${tone}
 
 # Entregable esperado
 1. Guion por fase (5 bloques), con duración sugerida según las ponderaciones.
-2. Recomendaciones concretas de jerarquía visual para la infografía de cada fase.
-3. Tres mejoras priorizadas para "${goal}", justificadas en el marco anterior.`;
+2. Recomendaciones concretas de jerarquía visual para cada fase, adaptadas al formato de salida (${F.name}).
+3. El contenido/estructura listo para producir el resultado en ese formato (ver "Formato de salida").
+4. Tres mejoras priorizadas para "${goal}", justificadas en el marco anterior.`;
 
   document.getElementById('promptOutput').value = prompt;
   document.getElementById('promptOutputWrap').style.display = 'block';
@@ -1924,6 +1949,25 @@ function buildVideoPrompt() {
   const tone = g('videoTone');
   const weights = ['hook','interest','desire','action','close']
     .map(k => `${k}: ${document.getElementById('weight-'+k)?.value || '?'}%`).join(', ');
+  const TOOLS = {
+    sora: 'OpenAI Sora — texto-a-video de alta calidad, buen para escenas cinematográficas y físicas realistas; clips de hasta ~20 s que se concatenan. Pega cada prompt de escena por separado.',
+    runway: 'Runway Gen-3 — clips cortos (5–10 s), excelente control de cámara e image-to-video; ideal para motion graphics y transiciones. Une las escenas en el editor de Runway.',
+    veo: 'Google Veo (en Gemini / Flow) — clips de alta fidelidad con audio; fuerte coherencia. Genera escena por escena y ensambla en Flow.',
+    kling: 'Kling AI — buen movimiento y duración de clip generosa; sólido para personas y producto. Genera por escena.',
+    pika: 'Pika — rápido y económico para clips cortos con efectos; bueno para redes verticales. Usa los prompts por escena.',
+    luma: 'Luma Dream Machine — image-to-video fluido y económico; ideal para dar vida a tomas de producto a partir de imágenes.',
+    higgsfield: 'Higgsfield — enfocado a social/vertical con plantillas de cámara; ideal para 9:16 y hooks dinámicos.',
+    capcut: 'CapCut — no genera video desde cero, pero el guion sirve como base: TTS para la voz en off, plantillas, subtítulos automáticos y edición rápida.',
+    auto: ''
+  };
+  let toolKey = g('videoTool') || 'auto';
+  if (toolKey === 'auto') {
+    if (/9:16/.test(aspect)) toolKey = 'higgsfield';
+    else if (/motion graphics|infografía/.test(style)) toolKey = 'runway';
+    else if (/screencast/.test(style)) toolKey = 'capcut';
+    else toolKey = 'sora';
+  }
+  const toolReco = TOOLS[toolKey] || TOOLS.sora;
 
   const prompt = `# Rol
 Actúa como director creativo y guionista de video especializado en piezas de pitch breves y de alto impacto para IA generativa de video.
@@ -1957,6 +2001,10 @@ ${audience}
 - Estilo visual: ${style}
 - Narración / voz: ${voice}
 - Tono: ${tone}
+
+# Herramienta de IA de video recomendada (dónde aplicar este prompt)
+${toolReco}
+Formatea el "PROMPT DE VIDEO condensado por escena" para esta herramienta y recuerda que la mayoría genera clips cortos: divide el guion en clips de 5–10 s y luego ensambla en un editor (CapCut, DaVinci Resolve o Premiere) añadiendo voz en off, música y subtítulos.
 
 # Ponderación por fase (reparte la duración total proporcionalmente)
 ${weights}
@@ -2063,6 +2111,35 @@ function injectFieldPromptButtons() {
   });
 }
 document.addEventListener('DOMContentLoaded', injectFieldPromptButtons);
+
+// ===== AUTOGUARDADO DEL FORMULARIO (build) =====
+const BUILD_FIELD_IDS = ['projectName','projectTagline','projectUrl','problemStatement','solutionStatement','valueProp','targetUser','tam','sam','som','userPain','competitor','advantages','moat','demoUrl','features','roadmap','techStack','architecture','techAdvantage','layoutStyle','fontChoice'];
+function saveBuildState() {
+  try {
+    const data = {};
+    BUILD_FIELD_IDS.forEach(id => { const el = document.getElementById(id); if (el) data[id] = el.value; });
+    localStorage.setItem('pitchcraft_build', JSON.stringify(data));
+  } catch (e) {}
+}
+function restoreBuildState() {
+  let data;
+  try { data = JSON.parse(localStorage.getItem('pitchcraft_build') || '{}'); } catch (e) { return; }
+  let any = false;
+  BUILD_FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && data[id] != null && data[id] !== '') { el.value = data[id]; any = true; }
+  });
+  if (any && typeof updateProgress === 'function') updateProgress();
+  if (any) document.querySelectorAll('[oninput*="updateCharCount"]').forEach(el => el.dispatchEvent(new Event('input')));
+}
+function initBuildAutosave() {
+  restoreBuildState();
+  BUILD_FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.addEventListener('input', saveBuildState); el.addEventListener('change', saveBuildState); }
+  });
+}
+document.addEventListener('DOMContentLoaded', initBuildAutosave);
 
 // ===== FOOTER: GOOEY TEXT (vanilla port) =====
 (function gooey() {
@@ -2529,6 +2606,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <div class="col-md-6"><label class="form-label-custom">Objetivo de la optimización</label><select class="form-control-custom" id="promptGoal"><option value="claridad y jerarquía visual">Claridad y jerarquía visual</option><option value="impacto persuasivo">Impacto persuasivo</option><option value="síntesis y reducción de carga cognitiva">Síntesis (menos carga cognitiva)</option><option value="adecuación a la audiencia">Adecuación a la audiencia</option></select></div>
 <div class="col-md-6"><label class="form-label-custom">Tono</label><select class="form-control-custom" id="promptTone"><option value="profesional y conciso">Profesional y conciso</option><option value="cercano y didáctico">Cercano y didáctico</option><option value="técnico y riguroso">Técnico y riguroso</option><option value="inspirador">Inspirador</option></select></div>
 </div>
+<div class="mb-3"><label class="form-label-custom">¿Dónde se aplicará el resultado?</label><select class="form-control-custom" id="promptOutputFormat"><option value="html">Infografía web HTML (una sola página)</option><option value="powerpoint">Presentación PowerPoint / Google Slides</option><option value="canva">Diseño en Canva</option><option value="image">Infografía estática (imagen para imprimir)</option></select></div>
 <button class="btn btn-primary-custom w-100 mb-3" onclick="buildPrompt()"><svg class="ic" aria-hidden="true"><use href="#i-magic"></use></svg> Generar prompt</button>
 <div id="promptOutputWrap" style="display:none">
 <label class="form-label-custom">Prompt generado</label>
@@ -2553,6 +2631,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <div class="col-md-6"><label class="form-label-custom">Estilo visual</label><select class="form-control-custom" id="videoStyle"><option value="motion graphics / infografía animada">Motion graphics / infografía</option><option value="cinematográfico con tomas reales">Cinematográfico (real)</option><option value="screencast del producto">Screencast del producto</option><option value="minimalista tipográfico">Minimalista tipográfico</option></select></div>
 <div class="col-md-6"><label class="form-label-custom">Narración / voz</label><select class="form-control-custom" id="videoVoice"><option value="voz en off profesional">Voz en off profesional</option><option value="sin narración, solo texto y música">Sin narración (texto+música)</option><option value="presentador a cámara">Presentador a cámara</option></select></div>
 <div class="col-md-6"><label class="form-label-custom">Tono</label><select class="form-control-custom" id="videoTone"><option value="profesional y conciso">Profesional y conciso</option><option value="dinámico y enérgico">Dinámico y enérgico</option><option value="inspirador">Inspirador</option><option value="cercano y didáctico">Cercano y didáctico</option></select></div>
+<div class="col-md-6"><label class="form-label-custom">Herramienta de IA de video</label><select class="form-control-custom" id="videoTool"><option value="auto">Recomendar según mis ajustes</option><option value="sora">OpenAI Sora</option><option value="runway">Runway Gen-3</option><option value="veo">Google Veo (Gemini / Flow)</option><option value="kling">Kling AI</option><option value="pika">Pika</option><option value="luma">Luma Dream Machine</option><option value="higgsfield">Higgsfield</option><option value="capcut">CapCut (script + edición)</option></select></div>
 </div>
 <button class="btn btn-primary-custom w-100 mb-3" onclick="buildVideoPrompt()"><svg class="ic" aria-hidden="true"><use href="#i-magic"></use></svg> Generar prompt de video</button>
 <button class="btn btn-outline-custom w-100 mb-3" onclick="loadSuperprompt()"><svg class="ic" aria-hidden="true"><use href="#i-code"></use></svg> Insertar superprompt de videoinfografía (HTML)</button>
