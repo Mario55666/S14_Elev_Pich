@@ -1957,6 +1957,7 @@ function buildVideoPrompt() {
     pika: 'Pika — rápido y económico para clips cortos con efectos; bueno para redes verticales. Usa los prompts por escena.',
     luma: 'Luma Dream Machine — image-to-video fluido y económico; ideal para dar vida a tomas de producto a partir de imágenes.',
     higgsfield: 'Higgsfield — enfocado a social/vertical con plantillas de cámara; ideal para 9:16 y hooks dinámicos.',
+    invideo: 'inVideo AI (Copilot) — genera el video COMPLETO desde una sola instrucción de texto (escenas, stock, voz en off y subtítulos). No usa prompts por clip: condensa todo en UNA instrucción única con duración, formato, idioma de la voz en off, música y subtítulos, y describe las 5 escenas AIDA+Close en orden dentro de esa instrucción. Luego refina por chat ("haz la escena 1 más corta", "cambia la música").',
     capcut: 'CapCut — no genera video desde cero, pero el guion sirve como base: TTS para la voz en off, plantillas, subtítulos automáticos y edición rápida.',
     auto: ''
   };
@@ -1968,6 +1969,10 @@ function buildVideoPrompt() {
     else toolKey = 'sora';
   }
   const toolReco = TOOLS[toolKey] || TOOLS.sora;
+  const singleInstructionTools = ['invideo', 'capcut'];
+  const assemblyNote = singleInstructionTools.includes(toolKey)
+    ? 'Esta herramienta produce el video completo desde una sola instrucción: entrega además una INSTRUCCIÓN ÚNICA lista para pegar que incluya duración, formato, idioma de la voz en off, música y subtítulos, y que describa las 5 escenas AIDA+Close en orden.'
+    : 'Formatea el "PROMPT DE VIDEO condensado por escena" para esta herramienta y recuerda que la mayoría genera clips cortos: divide el guion en clips de 5–10 s y luego ensambla en un editor (CapCut, DaVinci Resolve o Premiere) añadiendo voz en off, música y subtítulos.';
 
   const prompt = `# Rol
 Actúa como director creativo y guionista de video especializado en piezas de pitch breves y de alto impacto para IA generativa de video.
@@ -2004,7 +2009,7 @@ ${audience}
 
 # Herramienta de IA de video recomendada (dónde aplicar este prompt)
 ${toolReco}
-Formatea el "PROMPT DE VIDEO condensado por escena" para esta herramienta y recuerda que la mayoría genera clips cortos: divide el guion en clips de 5–10 s y luego ensambla en un editor (CapCut, DaVinci Resolve o Premiere) añadiendo voz en off, música y subtítulos.
+${assemblyNote}
 
 # Ponderación por fase (reparte la duración total proporcionalmente)
 ${weights}
@@ -2631,7 +2636,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <div class="col-md-6"><label class="form-label-custom">Estilo visual</label><select class="form-control-custom" id="videoStyle"><option value="motion graphics / infografía animada">Motion graphics / infografía</option><option value="cinematográfico con tomas reales">Cinematográfico (real)</option><option value="screencast del producto">Screencast del producto</option><option value="minimalista tipográfico">Minimalista tipográfico</option></select></div>
 <div class="col-md-6"><label class="form-label-custom">Narración / voz</label><select class="form-control-custom" id="videoVoice"><option value="voz en off profesional">Voz en off profesional</option><option value="sin narración, solo texto y música">Sin narración (texto+música)</option><option value="presentador a cámara">Presentador a cámara</option></select></div>
 <div class="col-md-6"><label class="form-label-custom">Tono</label><select class="form-control-custom" id="videoTone"><option value="profesional y conciso">Profesional y conciso</option><option value="dinámico y enérgico">Dinámico y enérgico</option><option value="inspirador">Inspirador</option><option value="cercano y didáctico">Cercano y didáctico</option></select></div>
-<div class="col-md-6"><label class="form-label-custom">Herramienta de IA de video</label><select class="form-control-custom" id="videoTool"><option value="auto">Recomendar según mis ajustes</option><option value="sora">OpenAI Sora</option><option value="runway">Runway Gen-3</option><option value="veo">Google Veo (Gemini / Flow)</option><option value="kling">Kling AI</option><option value="pika">Pika</option><option value="luma">Luma Dream Machine</option><option value="higgsfield">Higgsfield</option><option value="capcut">CapCut (script + edición)</option></select></div>
+<div class="col-md-6"><label class="form-label-custom">Herramienta de IA de video</label><select class="form-control-custom" id="videoTool"><option value="auto">Recomendar según mis ajustes</option><option value="sora">OpenAI Sora</option><option value="runway">Runway Gen-3</option><option value="veo">Google Veo (Gemini / Flow)</option><option value="kling">Kling AI</option><option value="pika">Pika</option><option value="luma">Luma Dream Machine</option><option value="higgsfield">Higgsfield</option><option value="invideo">inVideo AI (Copilot)</option><option value="capcut">CapCut (script + edición)</option></select></div>
 </div>
 <button class="btn btn-primary-custom w-100 mb-3" onclick="buildVideoPrompt()"><svg class="ic" aria-hidden="true"><use href="#i-magic"></use></svg> Generar prompt de video</button>
 <button class="btn btn-outline-custom w-100 mb-3" onclick="loadSuperprompt()"><svg class="ic" aria-hidden="true"><use href="#i-code"></use></svg> Insertar superprompt de videoinfografía (HTML)</button>
