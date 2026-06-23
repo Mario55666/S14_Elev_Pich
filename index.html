@@ -1843,7 +1843,24 @@ ${body}
 }
 
 // ===== GENERADOR DE PROMPT =====
-function openPromptModal() { document.getElementById('promptModal').classList.add('active'); }
+function buildAutoContext() {
+  const g = id => (document.getElementById(id)?.value || '').trim();
+  const audienceMap = { investor: 'inversores', client: 'clientes', partner: 'socios estratégicos', other: 'una audiencia personalizada' };
+  const audience = audienceMap[typeof currentAudience !== 'undefined' ? currentAudience : 'investor'] || 'mi audiencia';
+  const name = g('projectName'), tagline = g('projectTagline'), problem = g('problemStatement');
+  const user = g('targetUser'), value = g('valueProp');
+  if (!name && !problem && !value && !user) return '';
+  let s = `Presentaré ${name ? `"${name}"` : 'mi proyecto'}${tagline ? ` (${tagline})` : ''} ante ${audience}.`;
+  if (problem) s += ` Problema que aborda: ${problem}`;
+  if (user) s += ` Usuario objetivo: ${user}.`;
+  if (value) s += ` Propuesta de valor: ${value}`;
+  return s.trim();
+}
+function fillContextIfEmpty(id) {
+  const ctx = document.getElementById(id);
+  if (ctx && !ctx.value.trim()) ctx.value = buildAutoContext();
+}
+function openPromptModal() { fillContextIfEmpty('promptContext'); document.getElementById('promptModal').classList.add('active'); }
 function closePromptModal() { document.getElementById('promptModal').classList.remove('active'); }
 function buildPrompt() {
   const g = id => (document.getElementById(id)?.value || '').trim();
@@ -1933,7 +1950,7 @@ function copyPrompt() {
 }
 
 // ===== GENERADOR DE PROMPT DE VIDEO =====
-function openVideoPromptModal() { document.getElementById('videoPromptModal').classList.add('active'); }
+function openVideoPromptModal() { fillContextIfEmpty('videoContext'); document.getElementById('videoPromptModal').classList.add('active'); }
 function closeVideoPromptModal() { document.getElementById('videoPromptModal').classList.remove('active'); }
 function buildVideoPrompt() {
   const g = id => (document.getElementById(id)?.value || '').trim();
@@ -2606,7 +2623,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <button class="btn-close-modal" onclick="closePromptModal()" aria-label="Cerrar"><svg class="ic" aria-hidden="true"><use href="#i-x-lg"></use></svg></button>
 </div>
 <p style="color:var(--text-muted);font-size:0.9rem">Describe el <strong>contexto</strong> que identificaste para tu proyecto. El sistema combinará tus datos del Build con la metodología (AIDA+Close, audiencia y ponderaciones) y generará un prompt listo para optimizar tu pitch e infografía con una IA generativa.</p>
-<div class="mb-3"><label class="form-label-custom">Contexto identificado por el estudiante</label><textarea class="form-control-custom" id="promptContext" rows="3" placeholder="Ej: presentaré ante un comité académico que evalúa viabilidad; mi audiencia desconoce el problema técnico y prioriza el impacto social..."></textarea></div>
+<div class="mb-3"><label class="form-label-custom">Contexto identificado por el estudiante <button type="button" class="field-ai-btn" onclick="document.getElementById('promptContext').value=buildAutoContext();showToast('Contexto regenerado desde el formulario')" title="Rellenar desde los datos del formulario"><svg class="ic" aria-hidden="true"><use href="#i-arrow-counterclockwise"></use></svg> Auto</button></label><textarea class="form-control-custom" id="promptContext" rows="3" placeholder="Ej: presentaré ante un comité académico que evalúa viabilidad; mi audiencia desconoce el problema técnico y prioriza el impacto social..."></textarea></div>
 <div class="row g-3 mb-3">
 <div class="col-md-6"><label class="form-label-custom">Objetivo de la optimización</label><select class="form-control-custom" id="promptGoal"><option value="claridad y jerarquía visual">Claridad y jerarquía visual</option><option value="impacto persuasivo">Impacto persuasivo</option><option value="síntesis y reducción de carga cognitiva">Síntesis (menos carga cognitiva)</option><option value="adecuación a la audiencia">Adecuación a la audiencia</option></select></div>
 <div class="col-md-6"><label class="form-label-custom">Tono</label><select class="form-control-custom" id="promptTone"><option value="profesional y conciso">Profesional y conciso</option><option value="cercano y didáctico">Cercano y didáctico</option><option value="técnico y riguroso">Técnico y riguroso</option><option value="inspirador">Inspirador</option></select></div>
@@ -2628,7 +2645,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <button class="btn-close-modal" onclick="closeVideoPromptModal()" aria-label="Cerrar"><svg class="ic" aria-hidden="true"><use href="#i-x-lg"></use></svg></button>
 </div>
 <p style="color:var(--text-muted);font-size:0.9rem">Misma estructura AIDA+Close, pero el prompt resultante está pensado para <strong>producir un video pitch</strong>. Combina tus datos del Build con las ponderaciones y la audiencia para entregar un guion técnico y un prompt listo para una IA de generación de video.</p>
-<div class="mb-3"><label class="form-label-custom">Contexto identificado por el estudiante</label><textarea class="form-control-custom" id="videoContext" rows="3" placeholder="Ej: el video se proyectará al inicio de mi exposición; la audiencia no conoce el producto y decide en menos de un minuto..."></textarea></div>
+<div class="mb-3"><label class="form-label-custom">Contexto identificado por el estudiante <button type="button" class="field-ai-btn" onclick="document.getElementById('videoContext').value=buildAutoContext();showToast('Contexto regenerado desde el formulario')" title="Rellenar desde los datos del formulario"><svg class="ic" aria-hidden="true"><use href="#i-arrow-counterclockwise"></use></svg> Auto</button></label><textarea class="form-control-custom" id="videoContext" rows="3" placeholder="Ej: el video se proyectará al inicio de mi exposición; la audiencia no conoce el producto y decide en menos de un minuto..."></textarea></div>
 <div class="row g-3 mb-3">
 <div class="col-md-6"><label class="form-label-custom">Duración del video</label><select class="form-control-custom" id="videoDuration"><option value="30 segundos">30 segundos</option><option value="60 segundos">60 segundos</option><option value="90 segundos">90 segundos</option><option value="3 minutos">3 minutos</option></select></div>
 <div class="col-md-6"><label class="form-label-custom">Relación de aspecto</label><select class="form-control-custom" id="videoAspect"><option value="16:9 (horizontal)">16:9 (horizontal)</option><option value="9:16 (vertical)">9:16 (vertical)</option><option value="1:1 (cuadrado)">1:1 (cuadrado)</option></select></div>
