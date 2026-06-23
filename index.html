@@ -503,7 +503,11 @@ select.form-control-custom{appearance:none;background-image:url("data:image/svg+
 <button class="btn btn-outline-custom" onclick="clearBuild()"><svg class="ic" aria-hidden="true"><use href="#i-eraser"></use></svg> Limpiar campos</button>
 <button class="btn btn-outline-custom" onclick="openPromptModal()"><svg class="ic" aria-hidden="true"><use href="#i-stars"></use></svg> Generar prompt de optimización</button>
 <button class="btn btn-outline-custom" onclick="openVideoPromptModal()"><svg class="ic" aria-hidden="true"><use href="#i-play-circle"></use></svg> Generar prompt de video</button>
+<button class="btn btn-outline-custom" onclick="exportReportPDF()"><svg class="ic" aria-hidden="true"><use href="#i-download"></use></svg> Informe PDF</button>
+<button class="btn btn-outline-custom" onclick="exportReportMD()"><svg class="ic" aria-hidden="true"><use href="#i-journal-text"></use></svg> Informe .md</button>
+<button class="btn btn-outline-custom" onclick="exportReportCSV()"><svg class="ic" aria-hidden="true"><use href="#i-bar-chart"></use></svg> Datos .csv</button>
 </div>
+<p style="color:var(--text-muted);font-size:0.8rem;margin-top:0.75rem"><svg class="ic" aria-hidden="true"><use href="#i-info-circle"></use></svg> <strong>Entrega al docente:</strong> «Informe PDF» abre la vista de impresión del navegador (elige <em>Guardar como PDF</em>); «.md» y «.csv» descargan toda la información del formulario.</p>
 <p style="color:var(--text-muted);font-size:0.8rem;margin-top:0.75rem"><svg class="ic" aria-hidden="true"><use href="#i-info-circle"></use></svg> <strong>¿Qué hace el demo?</strong> Rellena cada campo con un ejemplo modelo para que veas el <em>tipo</em> y la <em>extensión</em> de información esperada. Reemplázalo con tu propio proyecto.</p>
 </div>
 
@@ -1717,6 +1721,119 @@ function clearBuild() {
   if (typeof updatePreview === 'function') updatePreview();
   document.querySelectorAll('[oninput*="updateCharCount"]').forEach(el => el.dispatchEvent(new Event('input')));
   showToast('Campos del proyecto limpiados.');
+}
+
+// ===== EXPORTAR INFORME PARA EL DOCENTE =====
+function collectReport() {
+  const g = id => (document.getElementById(id)?.value || '').trim();
+  const audienceMap = { investor: 'Inversores', client: 'Clientes', partner: 'Socios estratégicos', other: 'Audiencia personalizada' };
+  const audience = audienceMap[typeof currentAudience !== 'undefined' ? currentAudience : 'investor'] || '(no seleccionada)';
+  const sections = [
+    { title: 'Datos del estudiante', fields: [
+      ['Nombres', 'studentFirstName'], ['Apellidos', 'studentLastName'], ['Correo electrónico', 'studentEmail'] ] },
+    { title: 'Proyecto', fields: [
+      ['Nombre del proyecto', 'projectName'], ['Tagline', 'projectTagline'], ['URL del proyecto', 'projectUrl'],
+      ['Problema', 'problemStatement'], ['Solución', 'solutionStatement'], ['Propuesta de valor', 'valueProp'],
+      ['Usuario objetivo', 'targetUser'], ['Dolor del usuario', 'userPain'], ['Competencia', 'competitor'],
+      ['Diferenciadores', 'advantages'], ['Ventaja defensible (moat)', 'moat'],
+      ['Demo / funcionalidad clave', 'demoUrl'], ['Funcionalidades', 'features'], ['Roadmap', 'roadmap'] ] },
+    { title: 'Mercado', fields: [ ['TAM', 'tam'], ['SAM', 'sam'], ['SOM', 'som'] ] },
+    { title: 'Tecnología', fields: [ ['Stack tecnológico', 'techStack'], ['Arquitectura', 'architecture'], ['Ventaja técnica', 'techAdvantage'] ] }
+  ];
+  const weights = [['Hook', 'weight-hook'], ['Interés', 'weight-interest'], ['Deseo', 'weight-desire'], ['Acción', 'weight-action'], ['Cierre', 'weight-close']]
+    .map(([l, id]) => [l, (document.getElementById(id)?.value || '?') + '%']);
+  return { g, audience, sections, weights };
+}
+function slugReport() {
+  const g = id => (document.getElementById(id)?.value || '').trim();
+  const base = (g('studentLastName') || g('projectName') || 'informe').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return base || 'informe';
+}
+function downloadFile(filename, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function reportMeta() {
+  const { g, audience } = collectReport();
+  const student = `${g('studentFirstName')} ${g('studentLastName')}`.trim() || 'Estudiante';
+  const date = new Date().toLocaleDateString('es-PE', { year: 'numeric', month: 'long', day: 'numeric' });
+  return { student, audience, date, g };
+}
+function exportReportMD() {
+  const { g, sections, weights } = collectReport();
+  const { student, audience, date } = reportMeta();
+  let md = `# Informe de Pitch — ${g('projectName') || 'Proyecto sin título'}\n\n`;
+  md += `**Estudiante:** ${student}  \n`;
+  md += `**Correo:** ${g('studentEmail') || '(no indicado)'}  \n`;
+  md += `**Audiencia objetivo:** ${audience}  \n`;
+  md += `**Fecha:** ${date}  \n`;
+  md += `**Curso:** Infografía — Semana 14 · Metodología AIDA+Close\n\n`;
+  sections.forEach(s => {
+    md += `## ${s.title}\n\n`;
+    s.fields.forEach(([label, id]) => {
+      if (document.getElementById(id)) md += `- **${label}:** ${g(id) || '_(vacío)_'}\n`;
+    });
+    md += `\n`;
+  });
+  md += `## Ponderación por fase (AIDA+Close)\n\n| Fase | Peso |\n|---|---|\n`;
+  weights.forEach(([l, v]) => { md += `| ${l} | ${v} |\n`; });
+  md += `\n---\n_Generado con PitchCraft Interactive · d3magindesign_\n`;
+  downloadFile(`informe-pitch-${slugReport()}.md`, md, 'text/markdown;charset=utf-8');
+  showToast('Informe Markdown (.md) descargado');
+}
+function exportReportCSV() {
+  const { g, audience, sections, weights } = collectReport();
+  const esc = v => `"${String(v).replace(/"/g, '""')}"`;
+  const rows = [['Sección', 'Campo', 'Valor']];
+  sections.forEach(s => s.fields.forEach(([label, id]) => {
+    if (document.getElementById(id)) rows.push([s.title, label, g(id)]);
+  }));
+  rows.push(['Audiencia', 'Audiencia objetivo', audience]);
+  weights.forEach(([l, v]) => rows.push(['Ponderación', l, v]));
+  const csv = '﻿' + rows.map(r => r.map(esc).join(',')).join('\r\n');
+  downloadFile(`informe-pitch-${slugReport()}.csv`, csv, 'text/csv;charset=utf-8');
+  showToast('Datos CSV (.csv) descargados');
+}
+function exportReportPDF() {
+  const { g, audience, sections, weights } = collectReport();
+  const { student, date } = reportMeta();
+  const esc = v => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  let body = '';
+  sections.forEach(s => {
+    const rows = s.fields.filter(([l, id]) => document.getElementById(id))
+      .map(([l, id]) => `<tr><th>${esc(l)}</th><td>${esc(g(id)) || '<em>(vacío)</em>'}</td></tr>`).join('');
+    if (rows) body += `<h2>${esc(s.title)}</h2><table>${rows}</table>`;
+  });
+  const wrows = weights.map(([l, v]) => `<tr><th>${esc(l)}</th><td>${esc(v)}</td></tr>`).join('');
+  body += `<h2>Ponderación por fase (AIDA+Close)</h2><table>${wrows}</table>`;
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Informe de Pitch — ${esc(g('projectName') || 'Proyecto')}</title>
+<style>*{box-sizing:border-box}body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#1B2A4A;margin:40px;line-height:1.5}
+h1{font-size:24px;margin:0 0 4px}.sub{color:#555;font-size:13px;margin-bottom:20px}
+h2{font-size:16px;margin:22px 0 8px;color:#E8621A;border-bottom:2px solid #f0a830;padding-bottom:4px}
+table{width:100%;border-collapse:collapse;margin-bottom:8px}
+th,td{text-align:left;vertical-align:top;padding:6px 8px;border:1px solid #ddd;font-size:13px}
+th{width:32%;background:#f7f4ef;font-weight:600}.meta{font-size:13px;margin:2px 0}
+footer{margin-top:28px;font-size:11px;color:#999;text-align:center}@media print{body{margin:16mm}}</style></head><body>
+<h1>Informe de Pitch — ${esc(g('projectName') || 'Proyecto sin título')}</h1>
+<div class="sub">${esc(g('projectTagline') || '')}</div>
+<div class="meta"><strong>Estudiante:</strong> ${esc(student)}</div>
+<div class="meta"><strong>Correo:</strong> ${esc(g('studentEmail') || '(no indicado)')}</div>
+<div class="meta"><strong>Audiencia objetivo:</strong> ${esc(audience)}</div>
+<div class="meta"><strong>Fecha:</strong> ${esc(date)}</div>
+<div class="meta"><strong>Curso:</strong> Infografía — Semana 14 · Metodología AIDA+Close</div>
+${body}
+<footer>Generado con PitchCraft Interactive · d3magindesign</footer>
+<script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script>
+</body></html>`;
+  const w = window.open('', '_blank');
+  if (!w) { showToast('Permite las ventanas emergentes para generar el PDF'); return; }
+  w.document.open(); w.document.write(html); w.document.close();
+  showToast('Vista de impresión abierta: elige "Guardar como PDF"');
 }
 
 // ===== GENERADOR DE PROMPT =====
