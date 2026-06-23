@@ -174,6 +174,9 @@ select.form-control-custom{appearance:none;background-image:url("data:image/svg+
 .prompt-modal{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:2rem;max-width:680px;width:100%;box-shadow:0 24px 80px var(--shadow-tint)}
 .btn-close-modal{background:transparent;border:1px solid var(--border);color:var(--text-muted);width:36px;height:36px;border-radius:10px;cursor:pointer;transition:all .15s}
 .btn-close-modal:hover{border-color:var(--primary);color:var(--primary)}
+.field-ai-btn{display:inline-flex;align-items:center;gap:.3rem;margin-left:.5rem;padding:.1rem .5rem;font-size:.68rem;font-weight:600;border:1px solid var(--border);border-radius:8px;background:rgba(232,98,26,.12);color:var(--primary);cursor:pointer;vertical-align:middle;transition:all .2s;text-transform:none;letter-spacing:0}
+.field-ai-btn:hover{border-color:var(--primary);background:rgba(232,98,26,.22)}
+.field-ai-btn .ic{width:.85em;height:.85em}
 .presentation-overlay.active{display:flex}
 .presentation-overlay .preview-slide{display:none;text-align:center;max-width:900px}
 .presentation-overlay .preview-slide.active{display:block}
@@ -1994,6 +1997,73 @@ function loadSuperprompt() {
   showToast('Superprompt de videoinfografía insertado. Pégalo junto con tu documento/brief.');
 }
 
+// ===== EXTRACCIÓN POR CAMPO DESDE PDF CO-STORM =====
+const FIELD_PROMPTS = {
+  projectName: { label: 'Nombre del proyecto', instruction: 'Identifica el nombre propio del proyecto, producto o iniciativa que describe el informe.', constraints: 'Máx. 50 caracteres. Solo el nombre, sin descripción ni eslogan.' },
+  projectTagline: { label: 'Tagline', instruction: 'Redacta un lema breve que capture la esencia y la promesa central del proyecto.', constraints: 'Máx. 60 caracteres. Una sola frase, sin punto final.' },
+  problemStatement: { label: 'Problema que resuelve', instruction: 'Sintetiza el problema central que el proyecto aborda, incluyendo la magnitud o evidencia (cifras, estadísticas) si aparecen en el informe.', constraints: 'Máx. 200 caracteres. Concreto y enfocado en un solo problema.' },
+  solutionStatement: { label: 'Solución', instruction: 'Explica cómo el proyecto resuelve ese problema: el "qué" hace y el "cómo" esencial.', constraints: 'Máx. 200 caracteres. Directo, sin tecnicismos innecesarios.' },
+  valueProp: { label: 'Propuesta de valor única', instruction: 'Formula la propuesta de valor única: por qué es diferente y mejor que las alternativas existentes.', constraints: 'Máx. 120 caracteres. Una sola frase contundente.' },
+  targetUser: { label: 'Usuario ideal', instruction: 'Describe el usuario o cliente ideal (segmento, edad, rol, contexto de uso) según el informe.', constraints: 'Una línea breve y específica.' },
+  tam: { label: 'Tamaño de mercado (TAM / SAM / SOM)', instruction: 'Extrae el tamaño de mercado en tres niveles con las cifras que aparezcan: TAM (mercado total), SAM (mercado servible) y SOM (mercado obtenible).', constraints: 'Devuelve exactamente tres líneas etiquetadas "TAM:", "SAM:" y "SOM:". Si falta algún nivel, indícalo en su línea.' },
+  userPain: { label: 'Dolor principal del usuario', instruction: 'Identifica la frustración o dolor principal del usuario que el proyecto alivia.', constraints: '1 a 2 frases, centradas en la emoción/necesidad.' },
+  competitor: { label: 'Competidor principal', instruction: 'Nombra el competidor directo más relevante mencionado en el informe.', constraints: 'Solo el nombre del competidor (o "No identificado").' },
+  advantages: { label: 'Ventajas competitivas', instruction: 'Extrae las 3 ventajas competitivas más fuertes del proyecto frente a las alternativas.', constraints: 'Exactamente 3 ítems separados por comas.' },
+  moat: { label: 'Barrera de entrada / moat', instruction: 'Identifica la barrera de entrada o "moat" que hace difícil de copiar al proyecto (tecnología propia, red, datos, marca, etc.).', constraints: '1 frase.' },
+  demoUrl: { label: 'Funcionalidad clave / demo', instruction: 'Describe la funcionalidad estrella o el momento de demostración más impactante del producto (o la URL de demo si aparece).', constraints: '1 frase concreta.' },
+  features: { label: '3 funcionalidades principales', instruction: 'Extrae las 3 funcionalidades o características principales del producto.', constraints: 'Exactamente 3 ítems separados por comas.' },
+  roadmap: { label: 'Próximo hito / roadmap', instruction: 'Identifica el próximo hito o el roadmap a corto plazo mencionado en el informe.', constraints: '1 frase; incluye fases (Q1, Q2…) si el informe las indica.' },
+  techStack: { label: 'Stack tecnológico', instruction: 'Extrae el stack tecnológico (lenguajes, frameworks, bases de datos, infraestructura) mencionado.', constraints: 'Lista separada por comas.' },
+  techAdvantage: { label: 'Ventaja tecnológica', instruction: 'Identifica la ventaja tecnológica diferencial: lo que su tecnología les permite hacer mejor que otros.', constraints: '1 frase.' }
+};
+function openFieldPrompt(id) {
+  const f = FIELD_PROMPTS[id]; if (!f) return;
+  const project = (document.getElementById('projectName')?.value || '').trim();
+  const prompt = `# Rol
+Eres un analista que extrae información de un informe generado con Co-STORM (Stanford STORM).
+
+# Entrada
+Te adjunto el PDF del informe Co-STORM${project ? ` sobre "${project}"` : ''}. Léelo completo y básate ÚNICAMENTE en su contenido; no inventes datos ni añadas información externa.
+
+# Campo a completar: ${f.label}
+${f.instruction}
+
+# Restricciones de formato
+${f.constraints}
+
+# Si la información no aparece en el informe
+Responde exactamente: [No encontrado en el informe] y sugiere en una línea qué sección o término buscar.
+
+# Salida
+Devuelve solo el texto final, listo para pegar en el campo, sin comillas ni explicaciones.`;
+  document.getElementById('fieldPromptHeading').textContent = 'Extraer: ' + f.label;
+  document.getElementById('fieldPromptOutput').value = prompt;
+  document.getElementById('fieldPromptModal').classList.add('active');
+}
+function closeFieldPrompt() { document.getElementById('fieldPromptModal').classList.remove('active'); }
+function copyFieldPrompt() {
+  const t = document.getElementById('fieldPromptOutput');
+  navigator.clipboard.writeText(t.value).then(() => showToast('Prompt copiado al portapapeles')).catch(() => {
+    t.select(); document.execCommand('copy'); showToast('Prompt copiado');
+  });
+}
+function injectFieldPromptButtons() {
+  Object.keys(FIELD_PROMPTS).forEach(id => {
+    const el = document.getElementById(id); if (!el) return;
+    const wrap = el.closest('.mb-3,.mb-2,.mb-0'); if (!wrap) return;
+    const label = wrap.querySelector('label.form-label-custom');
+    if (!label || label.querySelector('.field-ai-btn')) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'field-ai-btn';
+    btn.title = 'Generar prompt para extraer este campo desde un PDF Co-STORM con IA';
+    btn.innerHTML = '<svg class="ic" aria-hidden="true"><use href="#i-magic"></use></svg> IA';
+    btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); openFieldPrompt(id); });
+    label.appendChild(btn);
+  });
+}
+document.addEventListener('DOMContentLoaded', injectFieldPromptButtons);
+
 // ===== FOOTER: GOOEY TEXT (vanilla port) =====
 (function gooey() {
   const phrases = ['INFOGRAFÍA', 'DATOS', 'AIDA+CLOSE', 'DISEÑO', 'IMPACTO'];
@@ -2583,6 +2653,18 @@ Crítico y directo. Si el documento pide algo técnicamente irrealizable o
 contraproducente para el objetivo (claridad de datos), dilo y propón
 alternativa. No rellenes. Si no tienes certeza sobre un parámetro, decláralo.
 </textarea>
+</div>
+</div>
+
+<div class="prompt-modal-overlay" id="fieldPromptModal" role="dialog" aria-modal="true" aria-labelledby="fieldPromptTitle">
+<div class="prompt-modal">
+<div class="d-flex justify-content-between align-items-start mb-3">
+<h3 id="fieldPromptTitle" style="font-family:'Syne',sans-serif;margin:0"><svg class="ic" style="color:var(--primary)" aria-hidden="true"><use href="#i-magic"></use></svg> <span id="fieldPromptHeading">Extraer con IA</span></h3>
+<button class="btn-close-modal" onclick="closeFieldPrompt()" aria-label="Cerrar"><svg class="ic" aria-hidden="true"><use href="#i-x-lg"></use></svg></button>
+</div>
+<p style="color:var(--text-muted);font-size:0.9rem">Copia este prompt y pégalo en tu asistente de IA <strong>junto con el PDF del informe Co-STORM</strong>. La IA extraerá la información para este campo; revísala y pégala en el formulario.</p>
+<textarea class="form-control-custom" id="fieldPromptOutput" rows="14" readonly style="font-family:'DM Mono',monospace;font-size:0.8rem"></textarea>
+<button class="btn btn-outline-custom w-100 mt-2" onclick="copyFieldPrompt()"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"></use></svg> Copiar prompt</button>
 </div>
 </div>
 
