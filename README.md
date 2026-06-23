@@ -18,6 +18,7 @@ Aplicación web de una sola página (PWA) para **construir, visualizar, practica
 6. Usa **Generar prompt de optimización** para obtener un prompt listo para refinar tu infografía con una IA.
 7. Usa **Generar prompt de video** para obtener un prompt con la misma estructura AIDA+Close, pero orientado a **producir un video pitch** (guion técnico por fase + prompt listo para una IA de generación de video).
 8. Usa **Informe PDF / .md / .csv** para descargar toda la información del formulario como informe de entrega para el docente (el PDF abre la vista de impresión del navegador → *Guardar como PDF*).
+9. En cada campo del formulario, pulsa el botón **IA** (junto a la etiqueta) para obtener un prompt adaptado a ese campo: cópialo y pégalo en tu asistente de IA junto con el **PDF del informe Co-STORM** para extraer automáticamente esa información.
 
 ---
 
