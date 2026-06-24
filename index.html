@@ -958,7 +958,7 @@ select.form-control-custom{appearance:none;background-image:url("data:image/svg+
 <div class="section-number" style="background:linear-gradient(135deg,var(--primary-dark),var(--gradient-end))"><svg class="ic" aria-hidden="true"><use href="#i-git"></use></svg></div>
 <h3 class="section-title">A/B Testing</h3>
 </div>
-<p style="color:var(--text-muted);margin-bottom:1rem">Crea dos versiones de tu pitch, distribuye aleatoriamente a receptores y compara cual genera mayor engagement.</p>
+<p style="color:var(--text-muted);margin-bottom:1rem">Guarda dos versiones de tu pitch (A y B), reparte sus URLs a distintos receptores y registra manualmente cuál prefieren. El conteo se guarda en este navegador (sin servidor).</p>
 <div class="d-flex gap-3">
 <button class="btn btn-primary-custom" onclick="createABTest()"><svg class="ic" aria-hidden="true"><use href="#i-plus-circle"></use></svg> Crear Test A/B</button>
 <button class="btn btn-outline-custom" onclick="viewABResults()"><svg class="ic" aria-hidden="true"><use href="#i-graph-up"></use></svg> Ver Resultados</button>
@@ -2665,13 +2665,56 @@ function exportEmbed() {
   navigator.clipboard.writeText(embed).then(() => showToast('Codigo embed copiado'));
 }
 
-function createABTest() {
-  showToast('Test A/B creado. Distribuyendo versiones...');
+// ===== A/B TESTING (serverless: 2 variantes + registro manual de votos) =====
+function encodePayload(p) { return btoa(unescape(encodeURIComponent(JSON.stringify(p)))); }
+function currentPayload() { return { v: 1, audience: currentAudience, theme: currentTheme, data: collectBuildData() }; }
+function urlFromPayload(p) { return currentBaseUrl() + '#p=' + encodePayload(p); }
+function getAB() { try { return JSON.parse(localStorage.getItem('pitchcraft_abtest') || '{}'); } catch (e) { return {}; } }
+function setAB(ab) { try { localStorage.setItem('pitchcraft_abtest', JSON.stringify(ab)); } catch (e) {} }
+function captureVariant(slot) {
+  const hasContent = (document.getElementById('projectName')?.value || '').trim() || (document.getElementById('problemStatement')?.value || '').trim();
+  if (!hasContent) { showToast('Completa el formulario en Construir antes de guardar una variante'); return; }
+  const ab = getAB();
+  ab[slot] = ab[slot] || { votes: 0 };
+  ab[slot].payload = currentPayload();
+  ab[slot].name = (document.getElementById('projectName')?.value || '').trim() || ('Variante ' + slot);
+  setAB(ab); renderAB(); showToast('Estado actual guardado como Variante ' + slot);
 }
-
-function viewABResults() {
-  showToast('Resultados A/B: Version A 65% | Version B 35%');
+function copyVariantUrl(slot) {
+  const ab = getAB();
+  if (!ab[slot] || !ab[slot].payload) { showToast('Primero guarda la Variante ' + slot); return; }
+  const url = urlFromPayload(ab[slot].payload);
+  navigator.clipboard.writeText(url).then(() => showToast('URL de Variante ' + slot + ' copiada')).catch(() => showToast('No se pudo copiar'));
 }
+function voteVariant(slot) {
+  const ab = getAB();
+  if (!ab[slot] || !ab[slot].payload) { showToast('Primero guarda la Variante ' + slot); return; }
+  ab[slot].votes = (ab[slot].votes || 0) + 1; setAB(ab); renderAB();
+}
+function resetAB() { setAB({}); renderAB(); showToast('Test A/B reiniciado'); }
+function renderAB() {
+  const ab = getAB();
+  ['A', 'B'].forEach(slot => {
+    const v = ab[slot];
+    const st = document.getElementById('ab' + slot + 'Status');
+    const votesEl = document.getElementById('ab' + slot + 'Votes');
+    if (st) st.textContent = (v && v.payload) ? ('Configurada — ' + (v.name || '')) : 'Sin configurar';
+    if (votesEl) votesEl.textContent = (v && v.votes) || 0;
+  });
+  const va = (ab.A && ab.A.votes) || 0, vb = (ab.B && ab.B.votes) || 0, tot = va + vb;
+  const pa = tot ? Math.round(va / tot * 100) : 0, pb = tot ? 100 - pa : 0;
+  const barA = document.getElementById('abBarA'), barB = document.getElementById('abBarB');
+  if (barA) barA.style.width = pa + '%';
+  if (barB) barB.style.width = pb + '%';
+  const res = document.getElementById('abResultText');
+  if (res) res.textContent = !tot
+    ? 'Aún no hay votos. Reparte las URLs y registra cada preferencia con «+1 voto».'
+    : `Variante A: ${pa}% (${va}) · Variante B: ${pb}% (${vb}) — ${va === vb ? 'empate' : 'gana ' + (va > vb ? 'A' : 'B')}`;
+}
+function openABModal() { renderAB(); document.getElementById('abModal').classList.add('active'); }
+function closeABModal() { document.getElementById('abModal').classList.remove('active'); }
+function createABTest() { openABModal(); }
+function viewABResults() { openABModal(); }
 
 // ===== TOAST =====
 function showToast(message) {
@@ -2951,6 +2994,44 @@ alternativa. No rellenes. Si no tienes certeza sobre un parámetro, decláralo.
 <div style="background:#fff;border-radius:14px;padding:1rem;display:inline-block;margin:0.5rem 0"><img id="qrImg" alt="Código QR del pitch" width="240" height="240" style="display:block"></div>
 <p id="qrFallback" style="display:none;color:var(--danger);font-size:0.85rem">No se pudo generar el QR (¿sin conexión?). Copia la URL y compártela.</p>
 <p id="qrUrlText" style="word-break:break-all;font-size:0.7rem;color:var(--text-muted);font-family:'DM Mono',monospace;margin-top:0.5rem"></p>
+</div>
+</div>
+
+<div class="prompt-modal-overlay" id="abModal" role="dialog" aria-modal="true" aria-labelledby="abTitle">
+<div class="prompt-modal" style="max-width:640px">
+<div class="d-flex justify-content-between align-items-start mb-3">
+<h3 id="abTitle" style="font-family:'Syne',sans-serif;margin:0"><svg class="ic" style="color:var(--primary)" aria-hidden="true"><use href="#i-git"></use></svg> A/B Testing</h3>
+<button class="btn-close-modal" onclick="closeABModal()" aria-label="Cerrar"><svg class="ic" aria-hidden="true"><use href="#i-x-lg"></use></svg></button>
+</div>
+<p style="color:var(--text-muted);font-size:0.88rem">Guarda dos versiones de tu pitch, reparte sus URLs y registra qué prefiere cada receptor. Sin servidor: el conteo se guarda en este navegador. <strong>Cómo:</strong> configura tu pitch en <em>Construir</em> → «Guardar actual como A»; cambia algo (tagline, tono, audiencia…) → «Guardar actual como B»; copia ambas URLs, distribúyelas y suma votos.</p>
+<div class="row g-3">
+<div class="col-md-6"><div class="metric-card" style="text-align:left">
+<h4 style="margin:0 0 .25rem;font-size:1rem"><span class="phase-badge phase-hook" style="opacity:1">Variante A</span></h4>
+<p id="abAStatus" style="font-size:.8rem;color:var(--text-muted);margin:.25rem 0 .75rem">Sin configurar</p>
+<div class="d-flex flex-wrap gap-2 mb-2">
+<button class="btn btn-outline-custom" style="padding:.4rem .7rem;font-size:.8rem" onclick="captureVariant('A')"><svg class="ic" aria-hidden="true"><use href="#i-save"></use></svg> Guardar actual</button>
+<button class="btn btn-outline-custom" style="padding:.4rem .7rem;font-size:.8rem" onclick="copyVariantUrl('A')"><svg class="ic" aria-hidden="true"><use href="#i-link-45deg"></use></svg> Copiar URL</button>
+</div>
+<div style="display:flex;align-items:center;gap:.5rem"><button class="btn btn-primary-custom" style="padding:.35rem .7rem;font-size:.8rem" onclick="voteVariant('A')">+1 voto</button> <span style="color:var(--text-muted);font-size:.85rem">Votos: <strong id="abAVotes" style="color:var(--text)">0</strong></span></div>
+</div></div>
+<div class="col-md-6"><div class="metric-card" style="text-align:left">
+<h4 style="margin:0 0 .25rem;font-size:1rem"><span class="phase-badge phase-close" style="opacity:1">Variante B</span></h4>
+<p id="abBStatus" style="font-size:.8rem;color:var(--text-muted);margin:.25rem 0 .75rem">Sin configurar</p>
+<div class="d-flex flex-wrap gap-2 mb-2">
+<button class="btn btn-outline-custom" style="padding:.4rem .7rem;font-size:.8rem" onclick="captureVariant('B')"><svg class="ic" aria-hidden="true"><use href="#i-save"></use></svg> Guardar actual</button>
+<button class="btn btn-outline-custom" style="padding:.4rem .7rem;font-size:.8rem" onclick="copyVariantUrl('B')"><svg class="ic" aria-hidden="true"><use href="#i-link-45deg"></use></svg> Copiar URL</button>
+</div>
+<div style="display:flex;align-items:center;gap:.5rem"><button class="btn btn-primary-custom" style="padding:.35rem .7rem;font-size:.8rem" onclick="voteVariant('B')">+1 voto</button> <span style="color:var(--text-muted);font-size:.85rem">Votos: <strong id="abBVotes" style="color:var(--text)">0</strong></span></div>
+</div></div>
+</div>
+<div style="margin-top:1.25rem">
+<div style="font-size:.75rem;color:var(--text-muted);margin-bottom:.2rem">Variante A</div>
+<div class="progress-track" style="margin:.2rem 0"><div class="progress-fill" id="abBarA" style="width:0"></div></div>
+<div style="font-size:.75rem;color:var(--text-muted);margin:.5rem 0 .2rem">Variante B</div>
+<div class="progress-track" style="margin:.2rem 0"><div class="progress-fill" id="abBarB" style="width:0;background:linear-gradient(90deg,var(--close-color),#4a8fb0)"></div></div>
+<p id="abResultText" style="color:var(--text);font-size:.88rem;margin-top:.75rem"></p>
+</div>
+<button class="btn btn-outline-custom w-100 mt-2" onclick="resetAB()"><svg class="ic" aria-hidden="true"><use href="#i-arrow-counterclockwise"></use></svg> Reiniciar test</button>
 </div>
 </div>
 
