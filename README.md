@@ -58,6 +58,8 @@ Todos los datos se guardan **localmente en el navegador** (`localStorage`); no s
 
 Para borrar los datos, limpia el almacenamiento del navegador para este archivo.
 
+**Compartir (sin servidor):** la sección *Compartir* genera una URL que **lleva el pitch codificado en el fragmento `#p=`** (base64). No hay backend: al abrir el enlace, la app decodifica y carga el pitch automáticamente. Por eso las métricas de aperturas/tiempo/dispositivos son una demostración (requieren un servidor de analítica) y solo el *Pitch Score* se calcula localmente. El **código QR** se renderiza con un servicio externo (`api.qrserver.com`) a partir de esa URL pública; si no hay conexión, usa el botón *Copiar*.
+
 ---
 
 ## Notas técnicas

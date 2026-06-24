@@ -917,9 +917,9 @@ select.form-control-custom{appearance:none;background-image:url("data:image/svg+
 <div class="section-number" style="background:linear-gradient(135deg,var(--accent),#059669)"><svg class="ic" aria-hidden="true"><use href="#i-link-45deg"></use></svg></div>
 <h3 class="section-title">URL de tu Pitch</h3>
 </div>
-<p style="color:var(--text-muted);margin-bottom:1rem">Comparte esta URL unica. Podras ver quien la abre, cuanto tiempo dedica a cada seccion y desde que dispositivo.</p>
+<p style="color:var(--text-muted);margin-bottom:1rem">Esta URL <strong>contiene tu pitch completo codificado</strong> (sin servidor): quien la abra cargará tu infografía automáticamente. Cuanto más completes el formulario, más rica será.</p>
 <div class="share-url" id="shareUrl">
-<span id="shareUrlText">https://pitchcraft.app/p/demo-pitch-123</span>
+<span id="shareUrlText" style="word-break:break-all">Genera tu enlace al abrir esta sección…</span>
 <button class="btn btn-outline-custom" style="padding:0.5rem 1rem;font-size:0.85rem" onclick="copyUrl()"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"></use></svg> Copiar</button>
 </div>
 <div class="d-flex gap-3 mt-3">
@@ -947,6 +947,7 @@ select.form-control-custom{appearance:none;background-image:url("data:image/svg+
 <span style="background:var(--darker);padding:0.5rem 1rem;border-radius:8px;font-size:0.85rem;color:var(--text-muted)"><svg class="ic" aria-hidden="true"><use href="#i-laptop"></use></svg> Desktop: 0%</span>
 <span style="background:var(--darker);padding:0.5rem 1rem;border-radius:8px;font-size:0.85rem;color:var(--text-muted)"><svg class="ic" aria-hidden="true"><use href="#i-tablet"></use></svg> Tablet: 0%</span>
 </div>
+<p style="color:var(--text-muted);font-size:0.78rem;margin-top:1rem"><svg class="ic" aria-hidden="true"><use href="#i-info-circle"></use></svg> El <strong>Pitch Score</strong> se calcula localmente según la completitud de tu formulario. Las métricas de aperturas, tiempo, conversión y dispositivos requieren un servidor de analítica; aquí se muestran como demostración.</p>
 </div>
 </div>
 
@@ -1119,6 +1120,10 @@ function showSection(section) {
   }
   if (section === 'home') {
     renderSavedPitches();
+  }
+  if (section === 'share') {
+    refreshShareUrl();
+    updateShareAnalytics();
   }
 }
 
@@ -1643,27 +1648,77 @@ function renderPracticeHistory() {
   `).join('');
 }
 
-// ===== SHARE =====
-function copyUrl() {
-  const url = document.getElementById('shareUrlText').textContent;
-  navigator.clipboard.writeText(url).then(() => showToast('URL copiada al portapapeles'));
+// ===== SHARE (serverless: el pitch viaja codificado en la URL) =====
+function currentBaseUrl() {
+  return (location.origin && location.origin !== 'null')
+    ? location.origin + location.pathname
+    : location.href.split('#')[0];
 }
-
+function collectBuildData() {
+  const data = {};
+  (typeof BUILD_FIELD_IDS !== 'undefined' ? BUILD_FIELD_IDS : []).forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.value) data[id] = el.value;
+  });
+  return data;
+}
+function buildShareUrl() {
+  const payload = { v: 1, audience: currentAudience, theme: currentTheme, data: collectBuildData() };
+  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  return currentBaseUrl() + '#p=' + b64;
+}
+function refreshShareUrl() {
+  const url = buildShareUrl();
+  const el = document.getElementById('shareUrlText');
+  if (el) el.textContent = url;
+  return url;
+}
+function updateShareAnalytics() {
+  const keyFields = ['projectName','projectTagline','problemStatement','solutionStatement','valueProp','targetUser','advantages','demoUrl'];
+  const filled = keyFields.filter(id => (document.getElementById(id)?.value || '').trim()).length;
+  const score = Math.round(filled / keyFields.length * 100);
+  const el = document.getElementById('analyticsScore');
+  if (el) el.textContent = score;
+}
+function copyUrl() {
+  const url = refreshShareUrl();
+  navigator.clipboard.writeText(url).then(() => showToast('URL del pitch copiada al portapapeles')).catch(() => showToast('No se pudo copiar; selecciona y copia manualmente'));
+}
 function shareNative() {
+  const url = refreshShareUrl();
   if (navigator.share) {
-    navigator.share({
-      title: 'PitchCraft - Mi Pitch',
-      text: 'Mira mi pitch de 3 minutos creado con PitchCraft',
-      url: document.getElementById('shareUrlText').textContent
-    }).catch(() => {});
+    navigator.share({ title: 'Mi Pitch — PitchCraft', text: 'Mira mi pitch creado con PitchCraft', url }).catch(() => {});
   } else {
     copyUrl();
   }
 }
-
 function generateQR() {
-  showToast('QR Code generado (simulado)');
+  const url = refreshShareUrl();
+  const img = document.getElementById('qrImg');
+  img.onerror = () => { document.getElementById('qrFallback').style.display = 'block'; };
+  document.getElementById('qrFallback').style.display = 'none';
+  img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=10&data=' + encodeURIComponent(url);
+  document.getElementById('qrUrlText').textContent = url;
+  document.getElementById('qrModal').classList.add('active');
 }
+function closeQR() { document.getElementById('qrModal').classList.remove('active'); }
+function loadSharedPitch() {
+  const m = location.hash.match(/[#&]p=([^&]+)/);
+  if (!m) return;
+  try {
+    const payload = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
+    if (!payload || !payload.data) return;
+    Object.entries(payload.data).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.value = val; });
+    if (payload.audience && typeof selectAudience === 'function') selectAudience(payload.audience);
+    if (payload.theme && typeof selectTheme === 'function') selectTheme(payload.theme);
+    if (typeof updateProgress === 'function') updateProgress();
+    if (typeof saveBuildState === 'function') saveBuildState();
+    document.querySelectorAll('[oninput*="updateCharCount"]').forEach(el => el.dispatchEvent(new Event('input')));
+    showToast('Pitch compartido cargado');
+    showSection('visualize');
+  } catch (e) {}
+}
+document.addEventListener('DOMContentLoaded', loadSharedPitch);
 
 // ===== REGISTRO DE ESTUDIANTE =====
 function saveStudent() {
@@ -2545,7 +2600,7 @@ document.addEventListener('input', e => { if (e.target.closest('#section-build')
 setTimeout(refreshRadar, 500);
 
 function exportEmbed() {
-  const embed = `<iframe src="${document.getElementById('shareUrlText').textContent}" width="100%" height="600" frameborder="0"></iframe>`;
+  const embed = `<iframe src="${refreshShareUrl()}" width="100%" height="600" frameborder="0"></iframe>`;
   navigator.clipboard.writeText(embed).then(() => showToast('Codigo embed copiado'));
 }
 
@@ -2822,6 +2877,19 @@ alternativa. No rellenes. Si no tienes certeza sobre un parámetro, decláralo.
 <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:.35rem"><svg class="ic" aria-hidden="true"><use href="#i-lightbulb"></use></svg> Consejo</div>
 <p id="phaseInfoTip" style="color:var(--text-muted);font-size:.9rem;margin:0;line-height:1.6"></p>
 </div>
+</div>
+</div>
+
+<div class="prompt-modal-overlay" id="qrModal" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
+<div class="prompt-modal" style="max-width:360px;text-align:center">
+<div class="d-flex justify-content-between align-items-start mb-3">
+<h3 id="qrTitle" style="font-family:'Syne',sans-serif;margin:0"><svg class="ic" style="color:var(--primary)" aria-hidden="true"><use href="#i-qr-code"></use></svg> Código QR</h3>
+<button class="btn-close-modal" onclick="closeQR()" aria-label="Cerrar"><svg class="ic" aria-hidden="true"><use href="#i-x-lg"></use></svg></button>
+</div>
+<p style="color:var(--text-muted);font-size:0.85rem">Escanéalo para abrir tu pitch en otro dispositivo.</p>
+<div style="background:#fff;border-radius:14px;padding:1rem;display:inline-block;margin:0.5rem 0"><img id="qrImg" alt="Código QR del pitch" width="240" height="240" style="display:block"></div>
+<p id="qrFallback" style="display:none;color:var(--danger);font-size:0.85rem">No se pudo generar el QR (¿sin conexión?). Copia la URL y compártela.</p>
+<p id="qrUrlText" style="word-break:break-all;font-size:0.7rem;color:var(--text-muted);font-family:'DM Mono',monospace;margin-top:0.5rem"></p>
 </div>
 </div>
 
