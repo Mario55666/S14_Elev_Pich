@@ -157,6 +157,11 @@ select.form-control-custom{appearance:none;background-image:url("data:image/svg+
 .phase-node-dot.completed{background:var(--accent)}
 .phase-node-label{font-size:0.75rem;color:var(--text-muted);font-weight:600}
 .phase-node-time{font-size:0.65rem;color:#475569}
+.phase-node[role="button"]{cursor:pointer;border-radius:10px;padding:.35rem .2rem;transition:background .2s}
+.phase-node[role="button"]:hover{background:rgba(232,98,26,.1)}
+.phase-node[role="button"]:hover .phase-node-label{color:var(--primary)}
+.phase-info-ic{width:.85em;height:.85em;opacity:.55;vertical-align:-0.1em}
+.phase-node[role="button"]:hover .phase-info-ic{opacity:1;color:var(--primary)}
 .phase-connector{flex:1;height:2px;background:var(--border);position:relative;top:-18px;z-index:1}
 .phase-connector.completed{background:linear-gradient(90deg,var(--accent),var(--primary))}
 .share-url{background:var(--darker);border:1px solid var(--border);border-radius:12px;padding:1rem;display:flex;align-items:center;gap:1rem;font-family:monospace;font-size:0.85rem;color:var(--text-muted);word-break:break-all}
@@ -456,17 +461,17 @@ select.form-control-custom{appearance:none;background-image:url("data:image/svg+
 <h3 class="section-title">Estructura del Elevator Pitch</h3>
 </div>
 <div class="phase-timeline">
-<div class="phase-node"><div class="phase-node-dot active" id="timeline-dot-0"></div><div class="phase-node-label">Hook</div><div class="phase-node-time">0-15s</div></div>
+<div class="phase-node" role="button" tabindex="0" onclick="openPhaseInfo(0)" onkeypress="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPhaseInfo(0)}"><div class="phase-node-dot active" id="timeline-dot-0"></div><div class="phase-node-label">Hook <svg class="ic phase-info-ic" aria-hidden="true"><use href="#i-info-circle"></use></svg></div><div class="phase-node-time">0-15s</div></div>
 <div class="phase-connector" id="timeline-conn-0"></div>
-<div class="phase-node"><div class="phase-node-dot" id="timeline-dot-1"></div><div class="phase-node-label">Problema</div><div class="phase-node-time">15-45s</div></div>
+<div class="phase-node" role="button" tabindex="0" onclick="openPhaseInfo(1)" onkeypress="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPhaseInfo(1)}"><div class="phase-node-dot" id="timeline-dot-1"></div><div class="phase-node-label">Problema <svg class="ic phase-info-ic" aria-hidden="true"><use href="#i-info-circle"></use></svg></div><div class="phase-node-time">15-45s</div></div>
 <div class="phase-connector" id="timeline-conn-1"></div>
-<div class="phase-node"><div class="phase-node-dot" id="timeline-dot-2"></div><div class="phase-node-label">Solucion</div><div class="phase-node-time">45-105s</div></div>
+<div class="phase-node" role="button" tabindex="0" onclick="openPhaseInfo(2)" onkeypress="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPhaseInfo(2)}"><div class="phase-node-dot" id="timeline-dot-2"></div><div class="phase-node-label">Solucion <svg class="ic phase-info-ic" aria-hidden="true"><use href="#i-info-circle"></use></svg></div><div class="phase-node-time">45-105s</div></div>
 <div class="phase-connector" id="timeline-conn-2"></div>
-<div class="phase-node"><div class="phase-node-dot" id="timeline-dot-3"></div><div class="phase-node-label">Accion</div><div class="phase-node-time">105-150s</div></div>
+<div class="phase-node" role="button" tabindex="0" onclick="openPhaseInfo(3)" onkeypress="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPhaseInfo(3)}"><div class="phase-node-dot" id="timeline-dot-3"></div><div class="phase-node-label">Accion <svg class="ic phase-info-ic" aria-hidden="true"><use href="#i-info-circle"></use></svg></div><div class="phase-node-time">105-150s</div></div>
 <div class="phase-connector" id="timeline-conn-3"></div>
-<div class="phase-node"><div class="phase-node-dot" id="timeline-dot-4"></div><div class="phase-node-label">Cierre</div><div class="phase-node-time">150-180s</div></div>
+<div class="phase-node" role="button" tabindex="0" onclick="openPhaseInfo(4)" onkeypress="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPhaseInfo(4)}"><div class="phase-node-dot" id="timeline-dot-4"></div><div class="phase-node-label">Cierre <svg class="ic phase-info-ic" aria-hidden="true"><use href="#i-info-circle"></use></svg></div><div class="phase-node-time">150-180s</div></div>
 </div>
-<p style="text-align:center;color:var(--text-muted);font-size:0.9rem">Cada fase tiene un tiempo asignado que garantiza el equilibrio narrativo de tu pitch. El sistema te alerta si excedes el tiempo de cada seccion.</p>
+<p style="text-align:center;color:var(--text-muted);font-size:0.9rem">Cada fase tiene un tiempo asignado que garantiza el equilibrio narrativo de tu pitch. El sistema te alerta si excedes el tiempo de cada seccion. <strong style="color:var(--primary)">Pulsa cada fase para ver su definición.</strong></p>
 </div>
 </div>
 
@@ -2166,6 +2171,39 @@ function initBuildAutosave() {
 }
 document.addEventListener('DOMContentLoaded', initBuildAutosave);
 
+// ===== DEFINICIONES DE FASE (popup) =====
+const PHASE_INFO = [
+  { name: 'Hook', time: '0–15 s', badgeClass: 'phase-hook', aida: 'AIDA+Close · Atención',
+    def: 'El gancho. Son los primeros segundos en los que captas la atención: una pregunta provocadora, un dato impactante o una afirmación audaz. Si fallas aquí, el resto del pitch no importa porque la audiencia ya se desconectó.',
+    tip: 'Arranca con una cifra sorprendente o una pregunta directa al oyente. Evita presentarte o dar contexto: ve directo al gancho.' },
+  { name: 'Problema', time: '15–45 s', badgeClass: 'phase-interest', aida: 'AIDA+Close · Interés',
+    def: 'Expones con claridad la necesidad o el dolor que vas a resolver. Debe ser relevante y tangible para tu audiencia, idealmente respaldado por un dato o una historia breve que genere identificación.',
+    tip: 'Haz que la audiencia sienta el problema. Un ejemplo concreto vale más que una descripción abstracta.' },
+  { name: 'Solución', time: '45–105 s', badgeClass: 'phase-desire', aida: 'AIDA+Close · Deseo',
+    def: 'El corazón del pitch y la fase más larga. Presenta tu propuesta: qué es, cómo funciona y por qué es la mejor forma de resolver el problema. Aquí muestras tu propuesta de valor y tus diferenciadores.',
+    tip: 'Conecta cada característica con un beneficio. Muestra (demo, captura o ejemplo) en lugar de solo contar.' },
+  { name: 'Acción', time: '105–150 s', badgeClass: 'phase-action', aida: 'AIDA+Close · Acción',
+    def: 'El llamado a la acción (CTA). Dices exactamente qué quieres que la audiencia haga: invertir, agendar una reunión, probar el demo o registrarse. Sin un CTA claro, el pitch se diluye.',
+    tip: 'Sé concreto y único: un solo siguiente paso, fácil de aceptar. «Agendemos 15 minutos esta semana» funciona mejor que «contáctanos».' },
+  { name: 'Cierre', time: '150–180 s', badgeClass: 'phase-close', aida: 'AIDA+Close · Cierre',
+    def: 'Retomas la idea-fuerza y cierras con impacto. Una frase memorable que resume tu valor y deja una impresión duradera; idealmente enlaza con el hook inicial para dar sensación de círculo cerrado.',
+    tip: 'Cierra con una sola frase potente. Si puedes, retoma la imagen o cifra del hook para reforzar el mensaje.' }
+];
+function openPhaseInfo(i) {
+  const p = PHASE_INFO[i]; if (!p) return;
+  const badge = document.getElementById('phaseInfoBadge');
+  badge.textContent = p.name;
+  badge.className = 'phase-badge ' + p.badgeClass;
+  badge.style.opacity = '1';
+  document.getElementById('phaseInfoName').textContent = '';
+  document.getElementById('phaseInfoTime').textContent = p.time;
+  document.getElementById('phaseInfoAida').textContent = p.aida;
+  document.getElementById('phaseInfoDef').textContent = p.def;
+  document.getElementById('phaseInfoTip').textContent = p.tip;
+  document.getElementById('phaseInfoModal').classList.add('active');
+}
+function closePhaseInfo() { document.getElementById('phaseInfoModal').classList.remove('active'); }
+
 // ===== FOOTER: GOOEY TEXT (vanilla port) =====
 (function gooey() {
   const phrases = ['INFOGRAFÍA', 'DATOS', 'AIDA+CLOSE', 'DISEÑO', 'IMPACTO'];
@@ -2769,6 +2807,21 @@ alternativa. No rellenes. Si no tienes certeza sobre un parámetro, decláralo.
 <p style="color:var(--text-muted);font-size:0.9rem">Copia este prompt y pégalo en tu asistente de IA <strong>junto con el PDF del informe Co-STORM</strong>. La IA extraerá la información para este campo; revísala y pégala en el formulario.</p>
 <textarea class="form-control-custom" id="fieldPromptOutput" rows="14" readonly style="font-family:'DM Mono',monospace;font-size:0.8rem"></textarea>
 <button class="btn btn-outline-custom w-100 mt-2" onclick="copyFieldPrompt()"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"></use></svg> Copiar prompt</button>
+</div>
+</div>
+
+<div class="prompt-modal-overlay" id="phaseInfoModal" role="dialog" aria-modal="true" aria-labelledby="phaseInfoTitle">
+<div class="prompt-modal" style="max-width:540px">
+<div class="d-flex justify-content-between align-items-start mb-3">
+<h3 id="phaseInfoTitle" style="font-family:'Syne',sans-serif;margin:0;display:flex;align-items:center;gap:.6rem"><span id="phaseInfoBadge" class="phase-badge" style="opacity:1">Fase</span> <span id="phaseInfoName">Definición</span></h3>
+<button class="btn-close-modal" onclick="closePhaseInfo()" aria-label="Cerrar"><svg class="ic" aria-hidden="true"><use href="#i-x-lg"></use></svg></button>
+</div>
+<div style="display:flex;align-items:center;gap:.5rem;color:var(--primary);font-weight:600;margin-bottom:.75rem"><svg class="ic" aria-hidden="true"><use href="#i-stopwatch"></use></svg> <span id="phaseInfoTime"></span> · <span id="phaseInfoAida" style="color:var(--text-muted);font-weight:500"></span></div>
+<p id="phaseInfoDef" style="color:var(--text);line-height:1.7;margin-bottom:1rem"></p>
+<div style="background:var(--darker);border:1px solid var(--border);border-radius:12px;padding:1rem">
+<div style="font-size:.75rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:.35rem"><svg class="ic" aria-hidden="true"><use href="#i-lightbulb"></use></svg> Consejo</div>
+<p id="phaseInfoTip" style="color:var(--text-muted);font-size:.9rem;margin:0;line-height:1.6"></p>
+</div>
 </div>
 </div>
 
