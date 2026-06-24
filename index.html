@@ -846,7 +846,9 @@ select.form-control-custom{appearance:none;background-image:url("data:image/svg+
 <button class="practice-btn" id="btnPlay" onclick="togglePractice()" title="Iniciar/Pausar"><svg class="ic" aria-hidden="true"><use href="#i-play-fill"></use></svg></button>
 <button class="practice-btn" onclick="resetPractice()" title="Reiniciar"><svg class="ic" aria-hidden="true"><use href="#i-arrow-counterclockwise"></use></svg></button>
 <button class="practice-btn" onclick="toggleRecording()" id="btnRecord" title="Grabar"><svg class="ic" aria-hidden="true"><use href="#i-mic"></use></svg></button>
+<button class="practice-btn" onclick="toggleNarration()" id="btnNarrate" title="Escuchar la locución de tu pitch (generada desde el formulario)"><svg class="ic" aria-hidden="true"><use href="#i-play-circle"></use></svg></button>
 </div>
+<p style="color:var(--text-muted);font-size:0.8rem;margin-top:0.75rem"><svg class="ic" aria-hidden="true"><use href="#i-play-circle"></use></svg> <strong>Locución:</strong> el botón <svg class="ic" aria-hidden="true"><use href="#i-play-circle"></use></svg> reproduce tu pitch leído por voz, generado a partir de los datos del formulario (Construir).</p>
 <div id="recordingStatus" style="margin-top:1rem;display:none">
 <span class="recording-indicator"><span class="recording-dot"></span> Grabando...</span>
 </div>
@@ -1107,6 +1109,7 @@ const PHASES = [
 
 // ===== NAVIGATION =====
 function showSection(section) {
+  if (typeof narrating !== 'undefined' && narrating && window.speechSynthesis) { window.speechSynthesis.cancel(); stopNarration(); }
   document.querySelectorAll('.section-content').forEach(s => s.style.display = 'none');
   document.getElementById('section-' + section).style.display = 'block';
   document.querySelectorAll('.nav-link-custom').forEach(n => n.classList.remove('active'));
@@ -1487,6 +1490,63 @@ function setPracticeMode(mode) {
   document.getElementById('practiceModeLabel').textContent = 'Modo: ' + mode.charAt(0).toUpperCase() + mode.slice(1);
 }
 
+// ===== LOCUCIÓN DEL PITCH (text-to-speech desde el formulario) =====
+let narrating = false;
+function buildPitchScript() {
+  const g = id => (document.getElementById(id)?.value || '').trim();
+  const name = g('projectName') || 'mi proyecto';
+  const tagline = g('projectTagline'), problem = g('problemStatement'), pain = g('userPain');
+  const solution = g('solutionStatement'), value = g('valueProp'), adv = g('advantages'), demo = g('demoUrl');
+  const seg = [];
+  seg.push({ phase: 'HOOK', text: tagline ? `${name}. ${tagline}.` : `${name}.` });
+  if (problem || pain) seg.push({ phase: 'INTERES', text: `El problema: ${problem}${pain ? '. ' + pain : ''}.` });
+  if (solution || value || adv) seg.push({ phase: 'DESEO', text: `Nuestra solución: ${solution}${value ? '. ' + value : ''}${adv ? '. Lo que nos diferencia: ' + adv : ''}.` });
+  seg.push({ phase: 'ACCION', text: demo ? `Da el siguiente paso: ${demo}.` : `Te invito a conocer ${name} y dar el siguiente paso.` });
+  seg.push({ phase: 'CIERRE', text: tagline ? `${name}. ${tagline}.` : `${name}. Gracias.` });
+  return seg;
+}
+function pickSpanishVoice() {
+  const voices = (window.speechSynthesis && window.speechSynthesis.getVoices()) || [];
+  return voices.find(v => /^es([-_]|$)/i.test(v.lang)) || voices.find(v => /es/i.test(v.lang)) || null;
+}
+function highlightPracticePhase(name) {
+  const p = PHASES.find(x => x.name === name) || PHASES[0];
+  const badge = document.getElementById('practicePhase');
+  if (badge) { badge.textContent = p.name; badge.className = 'phase-badge active phase-' + p.name.toLowerCase(); }
+  const t = document.getElementById('practicePhaseTime');
+  if (t) t.textContent = `Fase: ${p.start}-${p.end}s`;
+}
+function stopNarration() {
+  narrating = false;
+  const btn = document.getElementById('btnNarrate');
+  if (btn) { btn.classList.remove('active'); btn.innerHTML = '<svg class="ic" aria-hidden="true"><use href="#i-play-circle"></use></svg>'; }
+}
+function toggleNarration() {
+  if (!('speechSynthesis' in window)) { showToast('Tu navegador no soporta locución por voz'); return; }
+  if (narrating) { window.speechSynthesis.cancel(); stopNarration(); return; }
+  const hasContent = (document.getElementById('projectName')?.value || '').trim() || (document.getElementById('problemStatement')?.value || '').trim() || (document.getElementById('solutionStatement')?.value || '').trim();
+  if (!hasContent) { showToast('Completa el formulario en Construir para generar la locución'); return; }
+  window.speechSynthesis.cancel();
+  const segments = buildPitchScript();
+  const voice = pickSpanishVoice();
+  narrating = true;
+  const btn = document.getElementById('btnNarrate');
+  btn.classList.add('active');
+  btn.innerHTML = '<svg class="ic" aria-hidden="true"><use href="#i-stop-fill"></use></svg>';
+  let i = 0;
+  (function speakNext() {
+    if (!narrating || i >= segments.length) { stopNarration(); return; }
+    const s = segments[i++];
+    highlightPracticePhase(s.phase);
+    const u = new SpeechSynthesisUtterance(s.text);
+    u.lang = 'es-ES'; u.rate = 1; u.pitch = 1;
+    if (voice) u.voice = voice;
+    u.onend = speakNext;
+    u.onerror = () => stopNarration();
+    window.speechSynthesis.speak(u);
+  })();
+}
+
 function togglePractice() {
   const btn = document.getElementById('btnPlay');
   if (practiceRunning) {
@@ -1515,6 +1575,7 @@ function togglePractice() {
 
 function resetPractice() {
   clearInterval(practiceTimer);
+  if (window.speechSynthesis) { window.speechSynthesis.cancel(); stopNarration(); }
   practiceRunning = false;
   practiceSeconds = 180;
   document.getElementById('btnPlay').innerHTML = '<svg class="ic" aria-hidden="true"><use href="#i-play-fill"></use></svg>';

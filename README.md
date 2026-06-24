@@ -29,7 +29,7 @@ Aplicación web de una sola página (PWA) para **construir, visualizar, practica
 | **Inicio** | Presentación, robot mecatrónico animado, cronómetro de referencia y accesos directos. |
 | **Construir** | Registro del estudiante, demo guiado, perfil de audiencia con ponderaciones, 7 bloques estructurales, generador de prompt y fundamentación metodológica. |
 | **Visualizar** | Infografía interactiva, radar de audiencia y modo presentación a pantalla completa. |
-| **Practicar** | Cronómetro circular que cambia de color por fase, modos de ensayo e historial. |
+| **Practicar** | Cronómetro circular que cambia de color por fase, modos de ensayo, grabación por micrófono, **locución del pitch por voz (text-to-speech)** generada desde el formulario, e historial. |
 | **Compartir** | URL, código QR, embed e instalación como PWA. |
 
 ---
